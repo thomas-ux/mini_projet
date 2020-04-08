@@ -52,7 +52,7 @@ int main(void)
 
     	while(1)
     	{
-    		chThdSleepMilliseconds(1000);
+    		//chThdSleepMilliseconds(1000);
     	}
 }
 
