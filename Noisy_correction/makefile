@@ -13,8 +13,6 @@ CSRC += ./main.c \
 		./audio_processing.c \
 		./communications.c \
 		./fft.c \
-		./control_motor.c \
-		./distance.c \
 
 #Header folders to include
 INCDIR += 

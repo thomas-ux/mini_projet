@@ -27,80 +27,63 @@ static float micBack_output[FFT_SIZE];
 
 #define MIN_VALUE_THRESHOLD	10000 
 
-#define MIN_FREQ			130	//we don't analyze before this index to not use resources for nothing
-#define FREQ_FORWARD		134	//2086Hz
-#define FREQ_LEFT		145	//2273Hz
-#define FREQ_RIGHT		154	//2414HZ
-#define FREQ_BACKWARD	189	//2602Hz
-#define MAX_FREQ			195	//we don't analyze after this index to not use resources for nothing
+#define MIN_FREQ		10	//we don't analyze before this index to not use resources for nothing
+#define FREQ_FORWARD	16	//250Hz
+#define FREQ_LEFT		19	//296Hz
+#define FREQ_RIGHT		23	//359HZ
+#define FREQ_BACKWARD	26	//406Hz
+#define MAX_FREQ		30	//we don't analyze after this index to not use resources for nothing
 
-#define FREQ_FORWARD_L		(FREQ_FORWARD-2)
-#define FREQ_FORWARD_H		(FREQ_FORWARD+2)
-#define FREQ_LEFT_L			(FREQ_LEFT-2)
-#define FREQ_LEFT_H			(FREQ_LEFT+2)
-#define FREQ_RIGHT_L			(FREQ_RIGHT-2)
-#define FREQ_RIGHT_H			(FREQ_RIGHT+2)
-#define FREQ_BACKWARD_L		(FREQ_BACKWARD-2)
-#define FREQ_BACKWARD_H		(FREQ_BACKWARD+2)
+#define FREQ_FORWARD_L		(FREQ_FORWARD-1)
+#define FREQ_FORWARD_H		(FREQ_FORWARD+1)
+#define FREQ_LEFT_L			(FREQ_LEFT-1)
+#define FREQ_LEFT_H			(FREQ_LEFT+1)
+#define FREQ_RIGHT_L		(FREQ_RIGHT-1)
+#define FREQ_RIGHT_H		(FREQ_RIGHT+1)
+#define FREQ_BACKWARD_L		(FREQ_BACKWARD-1)
+#define FREQ_BACKWARD_H		(FREQ_BACKWARD+1)
 
 /*
 *	Simple function used to detect the highest value in a buffer
 *	and to execute a motor command depending on it
 */
+void sound_remote(float* data){
+	float max_norm = MIN_VALUE_THRESHOLD;
+	int16_t max_norm_index = -1; 
 
-void sound_remote(float *data)
-{
-	float max_amplitude = MIN_VALUE_THRESHOLD;
-	float max_freq = 0;
-
-	for(uint16_t i=MIN_FREQ; i<MAX_FREQ; i++)
-	{
-		if(data[i]>max_amplitude)
-		{
-			max_amplitude = data[i];
-			max_freq = i;
+	//search for the highest peak
+	for(uint16_t i = MIN_FREQ ; i <= MAX_FREQ ; i++){
+		if(data[i] > max_norm){
+			max_norm = data[i];
+			max_norm_index = i;
 		}
 	}
 
-	palSetPad(GPIOD, GPIOD_LED5);
-	palClearPad(GPIOD, GPIOD_LED_FRONT);
-	palClearPad(GPIOB, GPIOB_LED_BODY);
-	palTogglePad(GPIOD, GPIOD_LED7);
-	palTogglePad(GPIOD, GPIOD_LED3);
-
-	if(max_freq>=FREQ_FORWARD_L && max_freq<= FREQ_FORWARD_H)
-	{
-		right_motor_set_speed(1000);
-		left_motor_set_speed(1000);
-		palSetPad(GPIOD, GPIOD_LED_FRONT);
+	//go forward
+	if(max_norm_index >= FREQ_FORWARD_L && max_norm_index <= FREQ_FORWARD_H){
+		left_motor_set_speed(600);
+		right_motor_set_speed(600);
 	}
-
-	else if(max_freq>=FREQ_BACKWARD_L && max_freq<= FREQ_BACKWARD_H)
-	{
-		right_motor_set_speed(-1000);
-		left_motor_set_speed(-1000);
-		palClearPad(GPIOD, GPIOD_LED5);
+	//turn left
+	else if(max_norm_index >= FREQ_LEFT_L && max_norm_index <= FREQ_LEFT_H){
+		left_motor_set_speed(-600);
+		right_motor_set_speed(600);
 	}
-
-	else if(max_freq>=FREQ_RIGHT_L && max_freq<= FREQ_RIGHT_H)
-	{
-		right_motor_set_speed(1000);
-		left_motor_set_speed(-1000);
-		palSetPad(GPIOB, GPIOB_LED_BODY);
+	//turn right
+	else if(max_norm_index >= FREQ_RIGHT_L && max_norm_index <= FREQ_RIGHT_H){
+		left_motor_set_speed(600);
+		right_motor_set_speed(-600);
 	}
-
-	else if(max_freq>=FREQ_LEFT_L && max_freq<= FREQ_LEFT_H)
-	{
-		right_motor_set_speed(-1000);
-		left_motor_set_speed(1000);
-		palSetPad(GPIOB, GPIOB_LED_BODY);
+	//go backward
+	else if(max_norm_index >= FREQ_BACKWARD_L && max_norm_index <= FREQ_BACKWARD_H){
+		left_motor_set_speed(-600);
+		right_motor_set_speed(-600);
 	}
-
-	else
-	{
-		right_motor_set_speed(0);
+	else{
 		left_motor_set_speed(0);
+		right_motor_set_speed(0);
 	}
+	
 }
 
 /*
