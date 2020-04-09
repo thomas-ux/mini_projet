@@ -2,7 +2,7 @@
  * control_motor.c
  *
  *  Created on: Apr 6, 2020
- *      Author: manteauxthomas
+ *      Author: manteauxthomas.
  */
 
 #include "ch.h"

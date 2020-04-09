@@ -2,7 +2,7 @@
  * distance.h
  *
  *  Created on: Apr 6, 2020
- *      Author: manteauxthomas
+ *      Author: manteauxthomas.
  */
 
 #ifndef DISTANCE_H_

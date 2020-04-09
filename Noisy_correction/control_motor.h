@@ -2,7 +2,7 @@
  * control_motor.h
  *
  *  Created on: Apr 6, 2020
- *      Author: manteauxthomas
+ *      Author: manteauxthomas.
  */
 
 #ifndef CONTROL_MOTOR_H_
