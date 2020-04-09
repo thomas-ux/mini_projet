@@ -156,9 +156,7 @@ int main(void)
             SendFloatToComputer((BaseSequentialStream *) &SD3, bufferOutput, FFT_SIZE);
             //chprintf((BaseSequentialStream *) &SDU1, "time fft = %d us, time magnitude = %d us\n",time_fft, time_mag);
 
-        }
-#endif  /* SEND_FROM_MIC */
-    }
+
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
