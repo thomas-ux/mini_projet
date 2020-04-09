@@ -17,6 +17,7 @@
 static uint16_t state = 1;
 static uint16_t compteur = 0;
 
+
 static THD_WORKING_AREA(waControl_motor, 256);
 static THD_FUNCTION(ControlMotor, arg) {
 
