@@ -89,7 +89,7 @@ int main(void)
     	}
 
 
-    	//partie pour la caméra
+    	//partie pour la caméraaa
     	if(get_action())
     	{
     		while(right_motor_get_pos()<650)
