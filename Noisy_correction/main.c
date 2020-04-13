@@ -37,9 +37,7 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
 }
 
-int32_t return_cible(int32_t compteur, int32_t cible);
-
-void position_cible(int32_t cible, int32_t compteur);
+int32_t return_cible(int32_t compteur, int32_t cible, bool target);
 
 void direction_cible(int32_t cible);
 
@@ -61,13 +59,14 @@ int main(void)
     //inits the motors
     motors_init();
 
-    //VL53L0X_start();
+    VL53L0X_start();
     dcmi_start();
     po8030_start();
     process_image_start();
 
     int32_t compteur = 0;
     int32_t cible = 0;
+    bool target = 0; //indique si on a une cible acquise ou non
 
     while(1)
     {
@@ -75,13 +74,16 @@ int main(void)
     	compteur = right_motor_get_pos();
 
 
-    	cible = return_cible(compteur, cible);
+    	cible = return_cible(compteur, cible, target);
     	chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
 
     	if(compteur==TOUR)
     	{
+    		target=1;
     		direction_cible(cible);
     	}
+
+
 
 
     	//partie pour la caméra
@@ -104,9 +106,9 @@ int main(void)
 
 
 
-int32_t return_cible(int32_t compteur, int32_t cible)
+int32_t return_cible(int32_t compteur, int32_t cible, bool target)
 {
-	if(compteur<TOUR)
+	if(compteur<TOUR && !target)
 	{
 	    	right_motor_set_speed(150);
 	    	left_motor_set_speed(-150);
@@ -131,13 +133,13 @@ void direction_cible(int32_t cible)
 {
 	left_motor_set_pos(0);
 	if(cible >= (TOUR/2)){
-		while(left_motor_get_pos()<(TOUR-cible)){
+		while(left_motor_get_pos()<=(TOUR-cible)){
 			right_motor_set_speed(-150);
 			left_motor_set_speed(150);
 		}
 	}
-	else if(cible < (TOUR/2)){
-		while((-left_motor_get_pos())<cible){
+	else{
+		while((-left_motor_get_pos())<=cible){
 			right_motor_set_speed(150);
 			left_motor_set_speed(-150);
 		}
