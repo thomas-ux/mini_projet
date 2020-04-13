@@ -11,7 +11,11 @@
 #include <motors.h>
 #include <audio/microphone.h>
 
+#include "sensors/VL53L0X/VL53L0X.h"
+
 #include <arm_math.h>
+
+#define DISTANCE_MAX = 8190
 
 
 static void serial_start(void)
@@ -42,6 +46,12 @@ static void timer12_start(void){
     gptStartContinuous(&GPTD12, 0xFFFF);
 }
 
+int32_t return_cible(int32_t compteur);
+static uint16_t mesure = DISTANCE_MAX;
+
+
+
+
 int main(void)
 {
 
@@ -49,8 +59,41 @@ int main(void)
     chSysInit();
     mpu_init();
 
+    //lire valeurs du Time of Flight
+    VL53L0X_start();
+
+    int16_t mesure = DISTANCE_MAX;
+    int32_t compteur = 0;
+    int32_t cible = 0;
+
+    while(1){
+    	compteur = right_moteur_get_pos();
+    	cible = return_cible(compteur);
+
+    	chprintf((BaseSequentialStream *)&SD3, "mesure = %d; cible = %d\n", mesure, cible);
+    }
+
+}
 
 
+int32_t return_cible(int32_t compteur)
+{
+	int32_t cible = 0;
+	//1300 = nb de steps à faire pour faire un tour sur soi-même
+	if(compteur<1300){
+		right_motor_set_speed(150);
+		left_motor_set_speed(-150);
+
+		if(VL53L0X_get_dist_mm() < mesure && VL53L0X_get_dist_mm() > 0){
+			mesure = VL53L0X_get_dist_mm();
+			cible=compteur;
+		}
+	}
+	else if(compteur == 1300){
+		right_motor_set_speed(0);
+		left_motor_set_speed(0);
+	}
+	return cible;
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
