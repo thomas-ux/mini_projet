@@ -148,7 +148,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 			//extracts first 5bits of the first byte
 			//takes nothing from the second byte
 			image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-
 		}
 
 		//search for a line in the image and gets its width in pixels
@@ -191,11 +190,18 @@ uint16_t get_action(uint16_t state)
 		for(uint16_t i=20; i<(2*IMAGE_BUFFER_SIZE); i+=2)
 		{
 			//if(image[i/2]<(image[i/2-10]-50))
-			compteur++;
+			if(image[i/2]<25)
+			{
+				compteur++;
+				//chprintf((BaseSequentialStream *)&SDU1, "compteur = %d intensity = %d\n", compteur, image[i/2]);
+			}
 				//return 1;
 		}
-		if(compteur>100)
+		if(compteur>200 && compteur<300)
+		{
+			//chprintf((BaseSequentialStream *)&SDU1, "ok \n");
 			return 1;
+		}
 		else
 			return 0;
 	}

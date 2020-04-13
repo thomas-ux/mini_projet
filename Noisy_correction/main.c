@@ -38,11 +38,9 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
 }
 
-int32_t return_cible(int32_t compteur, int32_t cible);
+int32_t return_cible(int32_t compteur, int32_t cible, bool target);
 
-void position_cible(int32_t cible, int32_t compteur);
-
-
+void direction_cible(int32_t cible);
 
 static uint16_t mesure = DISTANCE_MAX;
 
@@ -68,54 +66,41 @@ int main(void)
     process_image_start();
 
     int32_t compteur = 0;
-    int32_t compteur2 = 0;
     int32_t cible = 0;
-    int32_t direction = 0;
+    bool target = 0;
 
     while(1)
     {
-    	//partie pour la cible
-   // 	compteur = right_motor_get_pos();
-   // 	compteur2 = left_motor_get_pos();
+
+       //partie pour la caméra
+        	      	//chprintf((BaseSequentialStream *)&SDU1, "get_action() = %d \n", get_action(state));
+
+        	        if(get_action(state))
+        	        	{
+        	        		state = 0;
+        	        		right_motor_set_pos(0);
+        	        		while(right_motor_get_pos()<650)
+        	        		{
+        	        			right_motor_set_speed(400);
+        	        			left_motor_set_speed(-400);
+        	        		}
+        	        	}
+        	        	else
+        	        	{
+        	        		right_motor_set_speed(0);
+        	        		left_motor_set_speed(0);
+        	        	}
+        	        	   chThdSleepMilliseconds(1000);
+        	        	   state = 1;
 
 
-    //	cible = return_cible(compteur, cible);
-    //	chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
-
-    //	if(compteur==TOUR)
-    //	{
-    	//	direction = (TOUR - cible);
-    		//left_motor_set_pos(0);
-    		//position_cible(cible, compteur);
-    //	}
-
-
-    	//partie pour la caméra
-    	chprintf((BaseSequentialStream *)&SDU1, "get_action() = %d \n", get_action(state));
-
-    	if(get_action(state))
-    	{
-    		//chprintf((BaseSequentialStream *)&SDU1, "get_action() = %d \n", get_action());
-    		state = 0;
-    		while(right_motor_get_pos()<650)
-    		{
-    			right_motor_set_speed(400);
-    			left_motor_set_speed(-400);
-    		}
-    	}
-    	else
-    	{
-    		right_motor_set_speed(0);
-    		left_motor_set_speed(0);
-    	}
-    	   chThdSleepMilliseconds(1000);
-    	   state = 1;
     }
 }
 
-int32_t return_cible(int32_t compteur, int32_t cible)
+int32_t return_cible(int32_t compteur, int32_t cible, bool target)
 {
-	if(compteur<TOUR)
+ 	//chprintf((BaseSequentialStream *)&SD3, "compteur = %d \n", compteur);
+	if(compteur<TOUR && !target)
 	{
 	    	right_motor_set_speed(150);
 	    	left_motor_set_speed(-150);
@@ -136,25 +121,24 @@ int32_t return_cible(int32_t compteur, int32_t cible)
 	return cible;
 }
 
-void position_cible(int32_t cible, int32_t compteur)
+void direction_cible(int32_t cible)
 {
-	int32_t direction = (TOUR - cible);
-	if(direction >= (TOUR/2))
-	{
-		right_motor_set_pos(cible);
-		left_motor_set_pos(-cible);
+	left_motor_set_pos(0);
+	if(cible >= (TOUR/2)){
+		while(left_motor_get_pos()<=(TOUR-cible)){
+			right_motor_set_speed(-150);
+			left_motor_set_speed(150);
+		}
 	}
-	else
-	{
-		right_motor_set_pos(-cible);
-		left_motor_set_pos(cible);
+	else{
+	 	//chprintf((BaseSequentialStream *)&SD3, "cible %d = \n", cible);
+		while((-left_motor_get_pos())<=cible){
+			right_motor_set_speed(150);
+			left_motor_set_speed(-150);
+		}
 	}
-}
-
-void go_cible(int32_t direction)
-{
-	//if(direction >= (TOUR/2))
-
+	right_motor_set_speed(0);
+	left_motor_set_speed(0);
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
