@@ -18,6 +18,7 @@
 #define DISTANCE_MAX		8190
 #define TOUR				1300
 
+//
 static void serial_start(void)
 {
 	static SerialConfig ser_cfg = {

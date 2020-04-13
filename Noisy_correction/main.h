@@ -5,12 +5,13 @@
 extern "C" {
 #endif
 
+
 #include "camera/dcmi_camera.h"
 #include "msgbus/messagebus.h"
 #include "parameter/parameter.h"
 
 
-//constants for the differents parts of the project
+//constants for the differents parts of the project//
 #define IMAGE_BUFFER_SIZE		640
 #define WIDTH_SLOPE				5
 #define MIN_LINE_WIDTH			40
