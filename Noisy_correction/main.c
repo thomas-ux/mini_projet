@@ -18,7 +18,7 @@
 #define DISTANCE_MAX		8190
 #define TOUR				1300
 
-//
+//.
 static void serial_start(void)
 {
 	static SerialConfig ser_cfg = {
@@ -42,7 +42,11 @@ int32_t return_cible(int32_t compteur, int32_t cible);
 
 void position_cible(int32_t cible, int32_t compteur);
 
+
+
 static uint16_t mesure = DISTANCE_MAX;
+
+
 
 int main(void)
 {
@@ -60,22 +64,32 @@ int main(void)
 
     //VL53L0X_start();
     dcmi_start();
-    	po8030_start();
-    	process_image_start();
+    po8030_start();
+    process_image_start();
 
-    	int32_t compteur = 0;
-    	int32_t cible = 0;
+    int32_t compteur = 0;
+    int32_t compteur2 = 0;
+    int32_t cible = 0;
+    int32_t direction = 0;
 
     while(1)
     {
-    		//compteur = right_motor_get_pos();
+    	//partie pour la cible
+    	compteur = right_motor_get_pos();
 
 
-    		//cible = return_cible(compteur, cible);
-    			//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
+    	cible = return_cible(compteur, cible);
+    	chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
 
-    		//position_cible(cible, compteur);
-    	right_motor_set_pos(0);
+    	if(compteur==TOUR)
+    	{
+    		direction = (TOUR - cible)
+    		right_motor_set_pos(0);
+    		position_cible(cible, compteur);
+    	}
+
+
+    	//partie pour la caméra
     	if(get_action())
     	{
     		while(right_motor_get_pos()<650)
@@ -120,8 +134,7 @@ int32_t return_cible(int32_t compteur, int32_t cible)
 
 void position_cible(int32_t cible, int32_t compteur)
 {
-	int32_t direction = (compteur - cible);
-	chprintf((BaseSequentialStream *)&SD3, "direction = %d mm cible %d = \n", compteur, cible);
+	int32_t direction = (TOUR - cible);
 	if(direction >= (TOUR/2))
 	{
 		right_motor_set_pos(cible);
@@ -132,6 +145,11 @@ void position_cible(int32_t cible, int32_t compteur)
 		right_motor_set_pos(-cible);
 		left_motor_set_pos(cible);
 	}
+}
+
+void go_cible(int32_t direction)
+{
+	if(direction >= (TOUR/2))
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
