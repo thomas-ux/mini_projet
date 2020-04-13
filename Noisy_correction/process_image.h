@@ -3,7 +3,7 @@
 
 float get_distance_cm(void);
 uint16_t get_line_position(void);
-uint16_t get_action(void);
+uint16_t get_action(uint16_t state);
 void process_image_start(void);
 
 #endif /* PROCESS_IMAGE_H */

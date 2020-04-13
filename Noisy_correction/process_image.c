@@ -12,7 +12,6 @@
 static float distance_cm = 0;
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
 static uint8_t image[IMAGE_BUFFER_SIZE] = {0};
-static uint16_t state = 1;
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
@@ -149,6 +148,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 			//extracts first 5bits of the first byte
 			//takes nothing from the second byte
 			image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
+
 		}
 
 		//search for a line in the image and gets its width in pixels
@@ -165,6 +165,11 @@ static THD_FUNCTION(ProcessImage, arg) {
 		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
+
+		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
+		{
+			//chprintf((BaseSequentialStream *)&SDU1, "pixel = %d mm intensité %d = \n", (i/2), image[i/2]);
+		}
     }
     chThdSleepMilliseconds(5000);
 }
@@ -177,21 +182,22 @@ uint16_t get_line_position(void){
 	return line_position;
 }
 
-uint16_t get_action(void)
+uint16_t get_action(uint16_t state)
 {
+	uint16_t compteur = 0;
 	if(state)
 	{
-		uint16_t compteur = 0;
-		for(uint16_t i=0; i<IMAGE_BUFFER_SIZE; i++)
+		//uint16_t compteur = 0;
+		for(uint16_t i=20; i<(2*IMAGE_BUFFER_SIZE); i+=2)
 		{
-			if(image[i]<30)
-				compteur++;
+			//if(image[i/2]<(image[i/2-10]-50))
+			compteur++;
+				//return 1;
 		}
 		if(compteur>100)
 			return 1;
 		else
 			return 0;
-		state = 0;
 	}
 	else
 		return 0;
