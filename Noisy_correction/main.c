@@ -11,12 +11,12 @@
 #include <motors.h>
 #include <audio/microphone.h>
 
-#include "sensors/VL53L0X/VL53L0X.h"
-
 #include <arm_math.h>
+#include "sensors/VL53L0X/VL53L0X.h"
+#include "process_image.h"
 
-#define DISTANCE_MAX = 8190
-
+#define DISTANCE_MAX		8190
+#define TOUR				1300
 
 static void serial_start(void)
 {
@@ -30,25 +30,20 @@ static void serial_start(void)
 	sdStart(&SD3, &ser_cfg); // UART3.
 }
 
-static void timer12_start(void){
-    //General Purpose Timer configuration   
-    //timer 12 is a 16 bit timer so we can measure time
-    //to about 65ms with a 1Mhz counter
-    static const GPTConfig gpt12cfg = {
-        1000000,        /* 1MHz timer clock in order to measure uS.*/
-        NULL,           /* Timer callback.*/
-        0,
-        0
-    };
-
-    gptStart(&GPTD12, &gpt12cfg);
-    //let the timer count to max value
-    gptStartContinuous(&GPTD12, 0xFFFF);
+void SendUint8ToComputer(uint8_t* data, uint16_t size)
+{
+	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
+	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)&size, sizeof(uint16_t));
+	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
 }
 
-int32_t return_cible(int32_t compteur);
-static uint16_t mesure = DISTANCE_MAX;
+int32_t return_cible(int32_t compteur, int32_t cible);
 
+void position_cible(int32_t cible, int32_t compteur);
+
+void direction_cible(int32_t cible);
+
+static uint16_t mesure = DISTANCE_MAX;
 
 
 
@@ -59,41 +54,96 @@ int main(void)
     chSysInit();
     mpu_init();
 
-    //lire valeurs du Time of Flight
-    VL53L0X_start();
+    //starts the serial communication
+    serial_start();
+    //starts the USB communication
+    usb_start();
+    //inits the motors
+    motors_init();
 
-    int16_t mesure = DISTANCE_MAX;
+    //VL53L0X_start();
+    dcmi_start();
+    po8030_start();
+    process_image_start();
+
     int32_t compteur = 0;
     int32_t cible = 0;
 
-    while(1){
-    	compteur = right_moteur_get_pos();
-    	cible = return_cible(compteur);
+    while(1)
+    {
+    	//partie pour la cible
+    	compteur = right_motor_get_pos();
 
-    	chprintf((BaseSequentialStream *)&SD3, "mesure = %d; cible = %d\n", mesure, cible);
+
+    	cible = return_cible(compteur, cible);
+    	chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
+
+    	if(compteur==TOUR)
+    	{
+    		direction_cible(cible);
+    	}
+
+
+    	//partie pour la caméra
+    	if(get_action())
+    	{
+    		while(right_motor_get_pos()<650)
+    		{
+    			right_motor_set_speed(400);
+    			left_motor_set_speed(-400);
+    		}
+    	}
+    	else
+    	{
+    		right_motor_set_speed(0);
+    		left_motor_set_speed(0);
+    	}
+    	   chThdSleepMilliseconds(1000);
     }
-
 }
 
 
-int32_t return_cible(int32_t compteur)
-{
-	int32_t cible = 0;
-	//1300 = nb de steps à faire pour faire un tour sur soi-même
-	if(compteur<1300){
-		right_motor_set_speed(150);
-		left_motor_set_speed(-150);
 
-		if(VL53L0X_get_dist_mm() < mesure && VL53L0X_get_dist_mm() > 0){
-			mesure = VL53L0X_get_dist_mm();
-			cible=compteur;
+int32_t return_cible(int32_t compteur, int32_t cible)
+{
+	if(compteur<TOUR)
+	{
+	    	right_motor_set_speed(150);
+	    	left_motor_set_speed(-150);
+
+	    	if(VL53L0X_get_dist_mm() < mesure && VL53L0X_get_dist_mm() > 0)
+	    	{
+	    		mesure = VL53L0X_get_dist_mm();
+	    		cible = compteur;
+	    	}
+	    //	return 0;
+	}
+ 	else if(compteur==TOUR)
+	{
+ 		right_motor_set_speed(0);
+	    left_motor_set_speed(0);
+	}
+
+	return cible;
+}
+
+void direction_cible(int32_t cible)
+{
+	left_motor_set_pos(0);
+	if(cible >= (TOUR/2)){
+		while((-left_motor_get_pos())<(TOUR-cible)){
+			right_motor_set_speed(150);
+			left_motor_set_speed(-150);
 		}
 	}
-	else if(compteur == 1300){
-		right_motor_set_speed(0);
-		left_motor_set_speed(0);
+	else if(cible < (TOUR/2)){
+		while(left_motor_get_pos()<cible){
+			right_motor_set_speed(-150);
+			left_motor_set_speed(150);
+		}
 	}
-	return cible;
+	right_motor_set_speed(0);
+	left_motor_set_speed(0);
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
