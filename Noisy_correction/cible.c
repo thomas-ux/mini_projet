@@ -100,7 +100,7 @@ void go_no_go(int16_t speed, uint8_t num_cible)
 			left_motor_set_speed(speed);
 		}
 	else
-		while(VL53L0X_get_dist_mm() != tab_cible[num_cible].distance)
+		while(VL53L0X_get_dist_mm() < tab_cible[num_cible].distance)
 		{
 			right_motor_set_speed(speed);
 			left_motor_set_speed(speed);

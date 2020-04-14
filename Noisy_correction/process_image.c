@@ -113,8 +113,8 @@ void capture_image(void)
 		//waits for the capture to be done
 		wait_image_ready();
 		image_process();
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-			chprintf((BaseSequentialStream *)&SDU1, "i = %d intensity = %d\n", (i/2), image[i/2]);
+		//for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
+			//chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
    // }
 }
 
@@ -150,35 +150,30 @@ void image_process(void)
 
 		if(send_to_computer){
 			//sends to the computer the image
-			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
+			//SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
 		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
 }
 
-uint16_t get_action(uint16_t state)
+uint16_t get_action(void)
 {
 	uint16_t compteur = 0;
-	if(state)
+	for(uint16_t i=20; i<(2*IMAGE_BUFFER_SIZE); i+=2)
 	{
-		//uint16_t compteur = 0;
-		for(uint16_t i=20; i<(2*IMAGE_BUFFER_SIZE); i+=2)
+		//if(image[i/2]<(image[i/2-10]-50))
+		if(image[i/2]<25)
 		{
-			//if(image[i/2]<(image[i/2-10]-50))
-			if(image[i/2]<25)
-			{
-				compteur++;
-				//chprintf((BaseSequentialStream *)&SDU1, "compteur = %d intensity = %d\n", compteur, image[i/2]);
-			}
-				//return 1;
+			compteur++;
+			//chprintf((BaseSequentialStream *)&SDU1, "compteur = %d intensity = %d\n", compteur, image[i/2]);
 		}
-		if(compteur>200 && compteur<300)
-		{
-			//chprintf((BaseSequentialStream *)&SDU1, "ok \n");
-			return 1;
-		}
-		else
-			return 0;
+	}
+	chprintf((BaseSequentialStream *)&SD3, "compteur = %d\n", compteur);
+
+	if(compteur>299 && compteur<300)
+	{
+		//chprintf((BaseSequentialStream *)&SDU1, "ok \n");
+		return 1;
 	}
 	else
 		return 0;

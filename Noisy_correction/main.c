@@ -17,6 +17,9 @@
 #include "cible.h"
 
 
+#include "audio/audio_thread.h"
+#include "audio/play_melody.h"
+
 //.
 static void serial_start(void)
 {
@@ -37,8 +40,6 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
 }
 
-static uint16_t state = 1;
-
 int main(void)
 {
 
@@ -58,12 +59,17 @@ int main(void)
    po8030_start();
 
    int32_t compteur = 0;
-       uint8_t num_cible = 0;
-       bool target = 0; //indique si on a une cible acquise ou non
-       init_tab_cible();
-    while(1)
+   uint8_t num_cible = 0;
+   init_tab_cible();
+
+	dac_start();
+	playMelodyStart();
+
+   while(1)
     {
-    	//partie pour la cible
+
+		playMelody(RUSSIA, ML_SIMPLE_PLAY, NULL);
+    		bool target = 0;
     		compteur = right_motor_get_pos();
 
     	    	return_cible(compteur, target);
@@ -75,27 +81,22 @@ int main(void)
     	    		direction_cible(num_cible);
     	    		go_no_go(200, num_cible);
     	    		capture_image();
+
+    	    		if(get_action())
+    	    		{
+    	    			right_motor_set_pos(0);
+    	    			while(right_motor_get_pos()<650)
+    	    			{
+    	    				right_motor_set_speed(400);
+    	    			    	left_motor_set_speed(-400);
+    	    			}
+    	    		}
+    	    		else
+    	    			go_no_go(-200, num_cible);
+    	    		right_motor_set_pos(0);
     	    	}
 
-    	//partie pour la caméra
-        //	chprintf((BaseSequentialStream *)&SDU1, "get_action() = %d \n", get_action(state));
-
-
-        //if(get_action(state))
-        //	{
-        	//	state = 0;
-        	//	while(right_motor_get_pos()<650)
-        	//	{
-        	//		right_motor_set_speed(400);
-        	//		left_motor_set_speed(-400);
-        		//}
-        //	}
-        //	else
-        //	{
-        	//	right_motor_set_speed(0);
-        	//	left_motor_set_speed(0);
-        //	}
-        	}
+    	}
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
