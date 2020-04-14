@@ -1,9 +1,10 @@
 #ifndef PROCESS_IMAGE_H
 #define PROCESS_IMAGE_H
 
-float get_distance_cm(void);
-uint16_t get_line_position(void);
+void capture_image(void);
+void image_process(void);
+uint16_t extract_line_width(uint8_t *buffer);
 uint16_t get_action(uint16_t state);
-void process_image_start(void);
+
 
 #endif /* PROCESS_IMAGE_H */

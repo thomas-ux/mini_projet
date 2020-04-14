@@ -13,9 +13,6 @@ static float distance_cm = 0;
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
 static uint8_t image[IMAGE_BUFFER_SIZE] = {0};
 
-//semaphore
-static BSEMAPHORE_DECL(image_ready_sem, TRUE);
-
 /*
  *  Returns the line's width extracted from the image buffer given
  *  Returns 0 if line not found
@@ -100,11 +97,8 @@ uint16_t extract_line_width(uint8_t *buffer){
 	}
 }
 
-static THD_WORKING_AREA(waCaptureImage, 256);
-static THD_FUNCTION(CaptureImage, arg) {
-
-    chRegSetThreadName(__FUNCTION__);
-    (void)arg;
+void capture_image(void)
+{
 
 	//Takes pixels 0 to IMAGE_BUFFER_SIZE of the line 10 + 11 (minimum 2 lines because reasons)
     po8030_advanced_config(FORMAT_RGB565, 0, 10, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
@@ -112,22 +106,20 @@ static THD_FUNCTION(CaptureImage, arg) {
     	dcmi_set_capture_mode(CAPTURE_ONE_SHOT);
     	dcmi_prepare();
 
-    while(1){
+  //  while(1)
+   // {
         //starts a capture
 		dcmi_capture_start();
 		//waits for the capture to be done
 		wait_image_ready();
-		//signals an image has been captured
-		chBSemSignal(&image_ready_sem);
-    }
+		image_process();
+		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
+			chprintf((BaseSequentialStream *)&SDU1, "i = %d intensity = %d\n", (i/2), image[i/2]);
+   // }
 }
 
-
-static THD_WORKING_AREA(waProcessImage, 1024);
-static THD_FUNCTION(ProcessImage, arg) {
-
-    chRegSetThreadName(__FUNCTION__);
-    (void)arg;
+void image_process(void)
+{
 
 	uint8_t *img_buff_ptr;
 	for(uint16_t k=0; k<IMAGE_BUFFER_SIZE; k++)
@@ -137,14 +129,12 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	bool send_to_computer = true;
 
-    while(1){
-    	//waits until an image has been captured
-        chBSemWait(&image_ready_sem);
 		//gets the pointer to the array filled with the last image in RGB565
 		img_buff_ptr = dcmi_get_last_image_ptr();
 
 		//Extracts only the red pixels
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2){
+		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
+		{
 			//extracts first 5bits of the first byte
 			//takes nothing from the second byte
 			image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
@@ -164,21 +154,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
-
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-		{
-			//chprintf((BaseSequentialStream *)&SDU1, "pixel = %d mm intensité %d = \n", (i/2), image[i/2]);
-		}
-    }
-    chThdSleepMilliseconds(5000);
-}
-
-float get_distance_cm(void){
-	return distance_cm;
-}
-
-uint16_t get_line_position(void){
-	return line_position;
 }
 
 uint16_t get_action(uint16_t state)
@@ -208,12 +183,3 @@ uint16_t get_action(uint16_t state)
 	else
 		return 0;
 }
-
-void process_image_start(void){
-	chThdCreateStatic(waProcessImage, sizeof(waProcessImage), NORMALPRIO, ProcessImage, NULL);
-	chThdCreateStatic(waCaptureImage, sizeof(waCaptureImage), NORMALPRIO, CaptureImage, NULL);
-}
-
-
-
-

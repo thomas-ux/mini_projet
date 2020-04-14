@@ -54,27 +54,48 @@ int main(void)
     motors_init();
 
    VL53L0X_start();
-   //dcmi_start();
-   //po8030_start();
-   //process_image_start();
+   dcmi_start();
+   po8030_start();
 
-    int32_t compteur = 0;
-    int32_t cible = 0;
-    bool target = 0;
-
+   int32_t compteur = 0;
+       uint8_t num_cible = 0;
+       bool target = 0; //indique si on a une cible acquise ou non
+       init_tab_cible();
     while(1)
     {
     	//partie pour la cible
-        	    compteur = right_motor_get_pos();
+    		compteur = right_motor_get_pos();
 
-        	    	cible = return_cible(compteur, cible, target);
+    	    	return_cible(compteur, target);
+    	    	//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
 
-        	    	if(compteur==TOUR)
-        	    	{
-        	    		target = 1;
-        	    		direction_cible(cible);
-        	    	}
-    }
+    	    	if(compteur==TOUR)
+    	    	{
+    	    		target=1;
+    	    		direction_cible(num_cible);
+    	    		go_no_go(200, num_cible);
+    	    		capture_image();
+    	    	}
+
+    	//partie pour la caméra
+        //	chprintf((BaseSequentialStream *)&SDU1, "get_action() = %d \n", get_action(state));
+
+
+        //if(get_action(state))
+        //	{
+        	//	state = 0;
+        	//	while(right_motor_get_pos()<650)
+        	//	{
+        	//		right_motor_set_speed(400);
+        	//		left_motor_set_speed(-400);
+        		//}
+        //	}
+        //	else
+        //	{
+        	//	right_motor_set_speed(0);
+        	//	left_motor_set_speed(0);
+        //	}
+        	}
 }
 
 #define STACK_CHK_GUARD 0xe2dee396
