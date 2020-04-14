@@ -122,7 +122,7 @@ void tri_croissant(void)
 	int32_t position = 0;
 	for(int j=0; j<NB_CIBLES-1; j++)
 	{
-		for(int i=j; i<NB_CIBLES-1; i++)
+		for(int i=j; i<NB_CIBLES; i++)
 		{
 			if(tab_cible[i].distance < min)
 			{
