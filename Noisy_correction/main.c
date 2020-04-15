@@ -16,6 +16,7 @@
 #include "process_image.h"
 #include "cible.h"
 
+#include "selector.h"
 
 #include "audio/audio_thread.h"
 #include "audio/play_melody.h"
@@ -42,7 +43,6 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 
 int main(void)
 {
-
     halInit();
     chSysInit();
     mpu_init();
@@ -57,45 +57,49 @@ int main(void)
    VL53L0X_start();
    dcmi_start();
    po8030_start();
+   dac_start();
+   playMelodyStart();
 
    int32_t compteur = 0;
    uint8_t num_cible = 0;
-   init_tab_cible();
+   int selector = 0;
+   //bool target = 0;
 
-	dac_start();
-	playMelodyStart();
+	init_tab_cible();
 
    while(1)
     {
+	   selector = get_selector();
+	   if(!selector)
+	   {
+		   palSetPad(GPIOB, GPIOB_LED_BODY);
+		   reset_motor();
+	   }
+	   else
+	   {
+		   palClearPad(GPIOB, GPIOB_LED_BODY);
+		   bool target = 0;
+		   compteur = right_motor_get_pos();
 
-		playMelody(RUSSIA, ML_SIMPLE_PLAY, NULL);
-    		bool target = 0;
-    		compteur = right_motor_get_pos();
+		   return_cible(compteur, target);
 
-    	    	return_cible(compteur, target);
-    	    	//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
+		   if(compteur==TOUR)
+		   {
+    	    			target=1;
+    	    			direction_cible(num_cible);
+    	    			action_cible();
+    	    			capture_image();
 
-    	    	if(compteur==TOUR)
-    	    	{
-    	    		target=1;
-    	    		direction_cible(num_cible);
-    	    		go_no_go(200, num_cible);
-    	    		capture_image();
-
-    	    		if(get_action())
-    	    		{
-    	    			right_motor_set_pos(0);
-    	    			while(right_motor_get_pos()<650)
+    	    			if(get_action())
     	    			{
-    	    				right_motor_set_speed(400);
-    	    			    	left_motor_set_speed(-400);
+    	    				playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    	    				ennemy();
     	    			}
-    	    		}
-    	    		else
-    	    			go_no_go(-200, num_cible);
-    	    		right_motor_set_pos(0);
-    	    	}
-
+    	    			else
+    	    				friend(-200, num_cible);
+    	    			right_motor_set_pos(0);
+		   }
+	   }
     	}
 }
 

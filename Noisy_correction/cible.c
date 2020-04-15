@@ -6,10 +6,8 @@
 #include "cible.h"
 #include "motors.h"
 #include "sensors/VL53L0X/VL53L0X.h"
+#include <math.h>
 
-//static uint16_t mesure = DISTANCE_MAX;
-
-static uint8_t indice = 0;
 static etat_cible tab_cible[NB_CIBLES] = {0};
 
 void init_tab_cible(void)
@@ -25,7 +23,7 @@ void tri_croissant(void)
 	int32_t position = 0;
 	for(int j=0; j<NB_CIBLES-1; j++)
 	{
-		for(int i=j; i<NB_CIBLES-1; i++)
+		for(int i=j; i<NB_CIBLES; i++)
 		{
 			if(tab_cible[i].distance < min)
 			{
@@ -44,23 +42,26 @@ void tri_croissant(void)
 
 void return_cible(int32_t compteur, bool target)
 {
+	bool identique = 0;
 	if(compteur<TOUR && !target)
 	{
-	    	right_motor_set_speed(150);
-	    	left_motor_set_speed(-150);
+	    right_motor_set_speed(300);
+	    left_motor_set_speed(-300);
 
-	    	if(VL53L0X_get_dist_mm() < DISTANCE_MAX && VL53L0X_get_dist_mm() > 0)
+	    if(VL53L0X_get_dist_mm() < DISTANCE_MAX && VL53L0X_get_dist_mm() > 0)
+	    {
+	    	tri_croissant();
+	    	for(int i=0; i<NB_CIBLES; i++)
 	    	{
-	    		tab_cible[indice].distance = VL53L0X_get_dist_mm();
-	    		tab_cible[indice].orientation = compteur;
-	    		if(indice>0)
-	    			indice--;
-	    		if(indice==0)
-	    		{
-	    			tri_croissant(); //pour qu'on écrase seulement les cibles les plus loin si il y a plus de 10 cibles
-	    			indice=9;
-	    		}
+	    		if((VL53L0X_get_dist_mm()==tab_cible[i].distance) && (compteur==tab_cible[i].orientation))
+	    			identique = 1;
 	    	}
+	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (!identique))
+	    	{
+	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    		tab_cible[NB_CIBLES-1].orientation = compteur;
+	    	}
+	    }
 	}
  	else if(compteur==TOUR)
 	{
@@ -69,43 +70,92 @@ void return_cible(int32_t compteur, bool target)
 	}
 }
 
+
 void direction_cible(uint8_t num_cible)
 {
+	//for(int i=0; i<NB_CIBLES; i++)
+	//	chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 	tri_croissant(); //ordonne tableau dans ordre croissant
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
 		while(left_motor_get_pos()<=(TOUR-tab_cible[num_cible].orientation)){
-			right_motor_set_speed(-150);
-			left_motor_set_speed(150);
+			right_motor_set_speed(-200);
+			left_motor_set_speed(200);
 		}
 	}
 	else{
 		while((-left_motor_get_pos())<=tab_cible[num_cible].orientation){
-			right_motor_set_speed(150);
-			left_motor_set_speed(-150);
+			right_motor_set_speed(200);
+			left_motor_set_speed(-200);
 		}
 	}
 	right_motor_set_speed(0);
 	left_motor_set_speed(0);
 }
 
-void go_no_go(int16_t speed, uint8_t num_cible)
+void action_cible(void)
 {
-	if(speed>0)
-		while(VL53L0X_get_dist_mm()>40)
-		{
-    			//chprintf((BaseSequentialStream *)&SD3, "distance = %d\n", VL53L0X_get_dist_mm());
-			right_motor_set_speed(speed);
-			left_motor_set_speed(speed);
-		}
-	else
-		while(VL53L0X_get_dist_mm() < tab_cible[num_cible].distance)
-		{
-			right_motor_set_speed(speed);
-			left_motor_set_speed(speed);
-		}
+	while(pi_regulator())
+	{
+		right_motor_set_speed(pi_regulator());
+		left_motor_set_speed(pi_regulator());
+	}
 	right_motor_set_speed(0);
 	left_motor_set_speed(0);
 }
 
+void friend(int16_t speed, uint8_t num_cible)
+{
+	while(VL53L0X_get_dist_mm() < tab_cible[num_cible].distance)
+	{
+		right_motor_set_speed(speed);
+	    left_motor_set_speed(speed);
+	}
+	right_motor_set_speed(0);
+    left_motor_set_speed(0);
+}
+
+void ennemy(void)
+{
+	right_motor_set_pos(0);
+	while(right_motor_get_pos()<650)
+	{
+		right_motor_set_speed(-1000);
+    	   	left_motor_set_speed(1000);
+	}
+}
+
+int16_t pi_regulator(void)
+{
+
+	float error = 0, speed = 0;
+
+	static float sum_error = 0;
+
+	error = CONSIGNE - VL53L0X_get_dist_mm();
+	chprintf((BaseSequentialStream *)&SD3, "error = %f mesure %d\n", error, VL53L0X_get_dist_mm());
+
+	if(error >= (-ERROR_THRESHOLD) && error <= 0)
+		return 0;
+
+	sum_error += error;
+
+	//we set a maximum and a minimum for the sum to avoid an uncontrolled growth
+	if(sum_error > MAX_SUM_ERROR)
+		sum_error = MAX_SUM_ERROR;
+	else if(sum_error < -MAX_SUM_ERROR)
+		sum_error = -MAX_SUM_ERROR;
+
+	speed = -(KP * error + KI * sum_error);
+
+    return (int16_t)speed;
+}
+
+void reset_motor(void)
+{
+	right_motor_set_speed(0);
+	left_motor_set_speed(0);
+	right_motor_set_pos(0);
+	left_motor_set_pos(0);
+}
