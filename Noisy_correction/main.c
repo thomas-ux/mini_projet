@@ -60,7 +60,6 @@ int main(void)
     int selector = 0;
     bool target = 0; //indique si on a une cible acquise ou non
     init_tab_cible();
-    init_selector();
 
     while(1)
     {

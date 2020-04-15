@@ -6,14 +6,14 @@
  */
 #include "ch.h"
 #include "hal.h"
-#include <math.h>
+#include "math.h"
 #include <motors.h>
 #include "cible.h"
 #include "sensors/VL53L0X/VL53L0X.h"
 
 
-//static uint16_t mesure = DISTANCE_MAX;
 static etat_cible tab_cible[NB_CIBLES] = {0};
+
 
 void init_tab_cible(void)
 {
@@ -52,22 +52,29 @@ void tri_croissant(void)
 void return_cible(int32_t compteur, bool target)
 {
 	bool identique = 0;
+	int ecart = DISTANCE_MAX;
+	int i_ecart = 0;
 	if(compteur<TOUR && !target)
 	{
 	    right_motor_set_speed(400);
 	    left_motor_set_speed(-400);
 
-	    if(VL53L0X_get_dist_mm() < DISTANCE_MAX && VL53L0X_get_dist_mm() > 0)
+	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
 	    	tri_croissant();
 	    	for(int i=0; i<NB_CIBLES; i++)
 	    	{
-	    		if((VL53L0X_get_dist_mm()==tab_cible[i].distance) && (compteur==tab_cible[i].orientation))
-	    			identique = 1;
+	    		if(abs(VL53L0X_get_dist_mm()-tab_cible[i].distance)<ecart)
+	    		{
+	    			ecart = abs(VL53L0X_get_dist_mm()-tab_cible[i].distance);
+	    			i_ecart = i;
+	    		}
 	    	}
-	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (!identique))
+	    	if((ecart<5) && (abs(compteur-tab_cible[i_ecart].orientation)<130))
+	    		identique = 1;
+	    	if((VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance) && (identique == 0))
 	    	{
-	    		tab_cible[NB_CIBLES-1].distance = (VL53L0X_get_dist_mm()-1);
+	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
 	    		tab_cible[NB_CIBLES-1].orientation = compteur;
 	    	}
 	    }
