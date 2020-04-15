@@ -91,7 +91,7 @@ int main(void)
     		right_motor_set_speed(0);
     		left_motor_set_speed(0);
     	}
-    	   chThdSleepMilliseconds(1000);
+    	chThdSleepMilliseconds(1000);
     }
 }
 

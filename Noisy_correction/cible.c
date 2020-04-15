@@ -7,8 +7,10 @@
 #include "ch.h"
 #include "hal.h"
 #include <math.h>
-#include <control_motor.c>
+#include <motors.h>
 #include "cible.h"
+#include "sensors/VL53L0X/VL53L0X.h"
+
 
 //static uint16_t mesure = DISTANCE_MAX;
 static uint8_t indice = 9;
@@ -17,7 +19,10 @@ static etat_cible tab_cible[NB_CIBLES] = {0};
 void init_tab_cible(void)
 {
 	for(int i=0; i<NB_CIBLES; i++)
+	{
 		tab_cible[i].distance=DISTANCE_MAX;
+		tab_cible[i].orientation=0;
+	}
 }
 
 void tri_croissant(void)
@@ -54,36 +59,14 @@ void return_cible(int32_t compteur, bool target)
 
 	    	if(VL53L0X_get_dist_mm() < DISTANCE_MAX && VL53L0X_get_dist_mm() > 0)
 	    	{
+	    		tab_cible[indice].distance = VL53L0X_get_dist_mm();
+	    		tab_cible[indice].orientation = compteur;
 	    		if(indice>0)
+	    			indice--;
+	    		else if(indice==0)
 	    		{
-	    			if(indice==9)
-	    			{
-	    				if(abs(tab_cible[0].distance-VL53L0X_get_dist_mm())>10 && (compteur-tab_cible[0].orientation)>100)
-	    				{
-	    					tab_cible[indice].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[indice].orientation = compteur;
-	    					indice--;
-	    				}
-	    			}
-	    			else
-	    			{
-	    				if(abs(tab_cible[indice+1].distance-VL53L0X_get_dist_mm())>10 && (compteur-tab_cible[indice+1].orientation)>100)
-	    				{
-	    					tab_cible[indice].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[indice].orientation = compteur;
-	    					indice--;
-	    				}
-	    			}
-	    		}
-	    	    if(indice==0)
-	    		{
-	    	    	if(abs(tab_cible[indice+1].distance-VL53L0X_get_dist_mm())>10 && (compteur-tab_cible[indice+1].orientation)>100)
-	    	    	{
-	    	    		tri_croissant(); //pour qu'on écrase seulement les cibles les plus loin si il y a plus de 10 cibles
-	    	    		tab_cible[indice].distance = VL53L0X_get_dist_mm();
-	    	    		tab_cible[indice].orientation = compteur;
-	    	    		indice=9;
-	    	    	}
+	    			tri_croissant(); //pour qu'on écrase seulement les cibles les plus loin si il y a plus de 10 cibles
+	    			indice=9;
 	    		}
 	    	}
 	}

@@ -30,12 +30,6 @@ extern messagebus_t bus;
 
 extern parameter_namespace_t parameter_root;
 
-typedef struct {
-	int32_t orientation;
-	uint16_t distance;
-    bool couleur;
-} etat_cible;
-
 void SendUint8ToComputer(uint8_t* data, uint16_t size);
 
 #ifdef __cplusplus
