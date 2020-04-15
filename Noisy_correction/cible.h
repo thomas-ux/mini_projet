@@ -8,7 +8,7 @@
 #ifndef CIBLE_H_
 #define CIBLE_H_
 
-#define DISTANCE_MAX		300 //en mm (au max une cible peut se trouver à 30cm de distance)
+#define DISTANCE_MAX		1000 //en mm (au max une cible peut se trouver à 30cm de distance)
 #define TOUR				1300
 #define NB_CIBLES			10
 

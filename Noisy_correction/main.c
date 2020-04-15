@@ -15,6 +15,7 @@
 #include "sensors/VL53L0X/VL53L0X.h"
 #include "process_image.h"
 #include "cible.h"
+#include "selector.h"
 
 
 static void serial_start(void)
@@ -56,42 +57,52 @@ int main(void)
 
     int32_t compteur = 0;
     uint8_t num_cible = 0;
+    int selector = 0;
     bool target = 0; //indique si on a une cible acquise ou non
     init_tab_cible();
+    init_selector();
 
     while(1)
     {
-    	//partie pour la cible
-    	compteur = right_motor_get_pos();
-
-
-    	return_cible(compteur, target);
-    	//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
-
-    	if(compteur==TOUR)
+    	selector = get_selector();
+    	if(selector==0)
     	{
-    		target=1;
-    		direction_cible(num_cible);
-    	}
-
-
-
-
-    	//partie pour la caméra
-    	if(get_action())
-    	{
-    		while(right_motor_get_pos()<650)
-    		{
-    			right_motor_set_speed(400);
-    			left_motor_set_speed(-400);
-    		}
+    		palClearPad(GPIOB, GPIOB_LED_BODY);
     	}
     	else
     	{
-    		right_motor_set_speed(0);
-    		left_motor_set_speed(0);
+    		//partie pour la cible
+    		compteur = right_motor_get_pos();
+
+
+    		return_cible(compteur, target);
+    		//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
+
+    		if(compteur==TOUR)
+    		{
+    			target=1;
+    			direction_cible(num_cible);
+    		}
+
+
+
+
+    		//partie pour la caméra
+    		if(get_action())
+    		{
+    			while(right_motor_get_pos()<650)
+    			{
+    				right_motor_set_speed(400);
+    				left_motor_set_speed(-400);
+    			}
+    		}
+    		else
+    		{
+    			right_motor_set_speed(0);
+    			left_motor_set_speed(0);
+    		}
+    		chThdSleepMilliseconds(1000);
     	}
-    	chThdSleepMilliseconds(1000);
     }
 }
 
