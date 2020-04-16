@@ -9,11 +9,15 @@
 #include <math.h>
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
+static uint16_t mesure = DISTANCE_MAX;
 
 void init_tab_cible(void)
 {
 	for(int i=0; i<NB_CIBLES; i++)
-		tab_cible[i].distance=DISTANCE_MAX;
+	{
+		tab_cible[i].distance = DISTANCE_MAX;
+		tab_cible[i].orientation = 0;
+	}
 }
 
 void tri_croissant(void)
@@ -43,25 +47,32 @@ void tri_croissant(void)
 void return_cible(int32_t compteur, bool target)
 {
 	bool identique = 0;
+	uint8_t indice = 0;
 	if(compteur<TOUR && !target)
 	{
-	    right_motor_set_speed(300);
-	    left_motor_set_speed(-300);
+	    right_motor_set_speed(400);
+	    left_motor_set_speed(-400);
 
-	    if(VL53L0X_get_dist_mm() < DISTANCE_MAX && VL53L0X_get_dist_mm() > 0)
+	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    	tri_croissant();
-	    	for(int i=0; i<NB_CIBLES; i++)
-	    	{
-	    		if((VL53L0X_get_dist_mm()==tab_cible[i].distance) && (compteur==tab_cible[i].orientation))
-	    			identique = 1;
+	    		if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			for(uint8_t i=0; i<NB_CIBLES; i++)
+	    			{
+	    				if(abs(VL53L0X_get_dist_mm()-tab_cible[i].distance) < 25 && abs(compteur-tab_cible[i].orientation) < 40)
+	    				{
+	    					identique = 1;
+	    					//indice = i;
+	    				}
+	    			}
+	    		if(!identique)
+	    		{
+	    			//if(VL53L0X_get_dist_mm() < tab_cible[indice].distance)
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    				tri_croissant();
+	    				chprintf((BaseSequentialStream *)&SD3, "compteur %d \n", compteur);
+	    	  	}
 	    	}
-	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (!identique))
-	    	{
-	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    		tab_cible[NB_CIBLES-1].orientation = compteur;
-	    	}
-	    }
 	}
  	else if(compteur==TOUR)
 	{
@@ -73,25 +84,25 @@ void return_cible(int32_t compteur, bool target)
 
 void direction_cible(uint8_t num_cible)
 {
-	//for(int i=0; i<NB_CIBLES; i++)
-	//	chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	for(int i=0; i<NB_CIBLES; i++)
+		chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 	tri_croissant(); //ordonne tableau dans ordre croissant
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
 		while(left_motor_get_pos()<=(TOUR-tab_cible[num_cible].orientation)){
-			right_motor_set_speed(-200);
-			left_motor_set_speed(200);
+			right_motor_set_speed(-VITESSE_SCAN);
+			left_motor_set_speed(VITESSE_SCAN);
 		}
 	}
 	else{
 		while((-left_motor_get_pos())<=tab_cible[num_cible].orientation){
-			right_motor_set_speed(200);
-			left_motor_set_speed(-200);
+			right_motor_set_speed(VITESSE_SCAN);
+			left_motor_set_speed(-VITESSE_SCAN);
 		}
 	}
-	right_motor_set_speed(0);
-	left_motor_set_speed(0);
+	right_motor_set_speed(VITESSE_NULLE);
+	left_motor_set_speed(VITESSE_NULLE);
 }
 
 void action_cible(void)
@@ -101,8 +112,8 @@ void action_cible(void)
 		right_motor_set_speed(pi_regulator());
 		left_motor_set_speed(pi_regulator());
 	}
-	right_motor_set_speed(0);
-	left_motor_set_speed(0);
+	right_motor_set_speed(VITESSE_NULLE);
+	left_motor_set_speed(VITESSE_NULLE);
 }
 
 void friend(int16_t speed, uint8_t num_cible)
@@ -112,8 +123,8 @@ void friend(int16_t speed, uint8_t num_cible)
 		right_motor_set_speed(speed);
 	    left_motor_set_speed(speed);
 	}
-	right_motor_set_speed(0);
-    left_motor_set_speed(0);
+	right_motor_set_speed(VITESSE_NULLE);
+    left_motor_set_speed(VITESSE_NULLE);
 }
 
 void ennemy(void)
@@ -121,9 +132,12 @@ void ennemy(void)
 	right_motor_set_pos(0);
 	while(right_motor_get_pos()<650)
 	{
-		right_motor_set_speed(-1000);
-    	   	left_motor_set_speed(1000);
+		right_motor_set_speed(-VITESSE_STRIKE);
+    	   	left_motor_set_speed(VITESSE_STRIKE);
+    	   	chprintf((BaseSequentialStream *)&SD3, "pos = %d\n", right_motor_get_pos());
 	}
+	right_motor_set_speed(VITESSE_NULLE);
+    left_motor_set_speed(VITESSE_NULLE);
 }
 
 int16_t pi_regulator(void)
@@ -154,8 +168,8 @@ int16_t pi_regulator(void)
 
 void reset_motor(void)
 {
-	right_motor_set_speed(0);
-	left_motor_set_speed(0);
-	right_motor_set_pos(0);
-	left_motor_set_pos(0);
+	right_motor_set_speed(VITESSE_NULLE);
+	left_motor_set_speed(VITESSE_NULLE);
+	right_motor_set_pos(POSITION_RESET);
+	left_motor_set_pos(POSITION_RESET);
 }

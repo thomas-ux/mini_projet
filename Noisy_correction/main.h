@@ -19,6 +19,12 @@ extern "C" {
 #define KP						3.0f
 #define KI 						0.002f	//must not be zero
 #define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT/KI)
+#define FENETRE_MIN				300
+#define FENETRE_MAX				500
+#define VITESSE_NULLE			0
+#define VITESSE_STRIKE			1000
+#define VITESSE_SCAN				300
+#define POSITION_RESET			0
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

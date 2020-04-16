@@ -59,13 +59,10 @@ void image_process(void)
 uint16_t get_action(void)
 {
 	uint16_t noir = 0, blanc = 0;
-	for(uint16_t i=(2*300); i<(2*500); i+=2)
+	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
 		if(image[i/2]<32)
-		{
 			noir++;
-			//chprintf((BaseSequentialStream *)&SDU1, "compteur = %d intensity = %d\n", compteur, image[i/2]);
-		}
 		if(image[i/2]>=40)
 			blanc++;
 	}

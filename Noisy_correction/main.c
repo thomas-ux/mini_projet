@@ -63,7 +63,7 @@ int main(void)
    int32_t compteur = 0;
    uint8_t num_cible = 0;
    int selector = 0;
-   //bool target = 0;
+   bool target = 0;
 
 	init_tab_cible();
 
@@ -78,7 +78,7 @@ int main(void)
 	   else
 	   {
 		   palClearPad(GPIOB, GPIOB_LED_BODY);
-		   bool target = 0;
+		   //bool target = 0;
 		   compteur = right_motor_get_pos();
 
 		   return_cible(compteur, target);
@@ -87,17 +87,17 @@ int main(void)
 		   {
     	    			target=1;
     	    			direction_cible(num_cible);
-    	    			action_cible();
-    	    			capture_image();
+    	    			//action_cible();
+    	    			//capture_image();
 
-    	    			if(get_action())
-    	    			{
-    	    				playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
-    	    				ennemy();
-    	    			}
-    	    			else
-    	    				friend(-200, num_cible);
-    	    			right_motor_set_pos(0);
+    	    			//if(get_action())
+    	    			//{
+    	    				//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    	    				//ennemy();
+    	    			//}
+    	    			//else
+    	    			//	friend(-200, num_cible);
+    	    			//right_motor_set_pos(0);
 		   }
 	   }
     	}
