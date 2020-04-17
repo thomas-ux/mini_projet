@@ -51,9 +51,6 @@ void tri_croissant(void)
 
 void return_cible(int32_t compteur, bool target)
 {
-	bool identique = 0;
-	int ecart = DISTANCE_MAX;
-	int i_ecart = 0;
 	if(compteur<TOUR && !target)
 	{
 	    right_motor_set_speed(400);
@@ -61,21 +58,19 @@ void return_cible(int32_t compteur, bool target)
 
 	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    	tri_croissant();
-	    	for(int i=0; i<NB_CIBLES; i++)
-	    	{
-	    		if(abs(VL53L0X_get_dist_mm()-tab_cible[i].distance)<ecart)
-	    		{
-	    			ecart = abs(VL53L0X_get_dist_mm()-tab_cible[i].distance);
-	    			i_ecart = i;
-	    		}
-	    	}
-	    	if((ecart<5) && (abs(compteur-tab_cible[i_ecart].orientation)<130))
-	    		identique = 1;
-	    	if((VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance) && (identique == 0))
+	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (compteur<tab_cible[NB_CIBLES-1].orientation+100))
 	    	{
 	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
 	    		tab_cible[NB_CIBLES-1].orientation = compteur;
+	    	}
+	    	else if(compteur > tab_cible[NB_CIBLES-1].orientation+100)
+	    	{
+	    		tri_croissant();
+	    		if(VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance)
+	    		{
+	    			tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    			tab_cible[NB_CIBLES-1].orientation = compteur;
+	    		}
 	    	}
 	    }
 	}
