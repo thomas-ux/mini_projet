@@ -22,6 +22,9 @@
 #include "audio/play_melody.h"
 
 //.
+
+static THD_WORKING_AREA(selector_thd_wa, 2048);
+
 static void serial_start(void)
 {
 	static SerialConfig ser_cfg = {
@@ -39,6 +42,54 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)&size, sizeof(uint16_t));
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
+}
+
+static THD_FUNCTION(selector_thd, arg)
+{
+    (void) arg;
+    chRegSetThreadName(__FUNCTION__);
+
+    int32_t compteur = 0;
+    uint8_t num_cible = 0;
+    bool target = 0;
+    init_tab_cible();
+
+	while(1)
+	{
+		if(get_selector()==0)
+		{
+			 palSetPad(GPIOB, GPIOB_LED_BODY);
+			 reset_motor();
+			 target = 0;
+
+			 init_tab_cible();
+		}
+		else
+		{
+			palClearPad(GPIOB, GPIOB_LED_BODY);
+		   //bool target = 0;
+		   compteur = right_motor_get_pos();
+
+		   return_cible(compteur, target);
+
+		   if(compteur==TOUR)
+		   {
+			   target=1;
+    			   direction_cible(num_cible);
+    			   action_cible();
+    			   capture_image();
+
+    			   if(get_action())
+    			   {
+		    			playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    			   	   	ennemy();
+		    	    	}
+		    	    	else
+		    	    		friend(-200, num_cible);
+		    	    	right_motor_set_pos(0);
+			}
+		}
+	}
 }
 
 int main(void)
@@ -60,49 +111,12 @@ int main(void)
    dac_start();
    playMelodyStart();
 
-   int32_t compteur = 0;
-   uint8_t num_cible = 0;
-   int selector = 0;
-   bool target = 0;
-   init_tab_cible();
+   chThdCreateStatic(selector_thd_wa, sizeof(selector_thd_wa), NORMALPRIO, selector_thd, NULL);
 
    while(1)
     {
-	   selector = get_selector();
-	   if(!selector)
-	   {
-		   palSetPad(GPIOB, GPIOB_LED_BODY);
-		   reset_motor();
-		   target = 0;
-
-		   init_tab_cible();
-	   }
-	   else
-	   {
-		   palClearPad(GPIOB, GPIOB_LED_BODY);
-		   //bool target = 0;
-		   compteur = right_motor_get_pos();
-
-		   return_cible(compteur, target);
-
-		   if(compteur==TOUR)
-		   {
-    	    			target=1;
-    	    			direction_cible(num_cible);
-    	    			action_cible();
-    	    			//capture_image();
-
-    	    			//if(get_action())
-    	    			//{
-    	    				//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
-    	    				//ennemy();
-    	    			//}
-    	    			//else
-    	    			//	friend(-200, num_cible);
-    	    			//right_motor_set_pos(0);
-		   }
-	   }
-    	}
+	   chThdSleepMilliseconds(1000);
+    }
 }
 
 #define STACK_CHK_GUARD 0xe2dee396

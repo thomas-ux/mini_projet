@@ -129,7 +129,6 @@ void ennemy(void)
 	{
 		right_motor_set_speed(-VITESSE_STRIKE);
     	   	left_motor_set_speed(VITESSE_STRIKE);
-    	   	chprintf((BaseSequentialStream *)&SD3, "pos = %d\n", right_motor_get_pos());
 	}
 	right_motor_set_speed(VITESSE_NULLE);
     left_motor_set_speed(VITESSE_NULLE);
