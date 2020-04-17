@@ -15,8 +15,15 @@
 #include "sensors/VL53L0X/VL53L0X.h"
 #include "process_image.h"
 #include "cible.h"
+
 #include "selector.h"
 
+#include "audio/audio_thread.h"
+#include "audio/play_melody.h"
+
+//.
+
+static THD_WORKING_AREA(selector_thd_wa, 2048);
 
 static void serial_start(void)
 {
@@ -37,6 +44,58 @@ void SendUint8ToComputer(uint8_t* data, uint16_t size)
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);
 }
 
+static THD_FUNCTION(selector_thd, arg)
+{
+    (void) arg;
+    chRegSetThreadName(__FUNCTION__);
+
+    int32_t compteur = 0;
+    uint8_t num_cible = 0;
+    bool target = 0;
+    init_tab_cible();
+
+	while(1)
+	{
+		if(get_selector()==0)
+		{
+			 palSetPad(GPIOB, GPIOB_LED_BODY);
+			 palClearPad(GPIOD, GPIOD_LED_FRONT);
+			 reset_motor();
+			 target = 0;
+
+			 init_tab_cible();
+		}
+		else
+		{
+
+			palClearPad(GPIOB, GPIOB_LED_BODY);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
+		   //bool target = 0;
+		   compteur = right_motor_get_pos();
+
+		   return_cible(compteur, target);
+
+		   if(compteur==TOUR)
+		   {
+			   target=1;
+			   direction_cible(num_cible);
+    		   action_cible(VITESSE_STANDARD, num_cible);
+    		   capture_image();
+
+    		   if(get_action())
+    		   {
+    			   playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    			   ennemy();
+    			   action_cible(-VITESSE_STANDARD, num_cible);
+    		   }
+    		   else
+    			   action_cible(-VITESSE_STANDARD, num_cible);
+    		   	   right_motor_set_pos(0);
+			}
+		}
+	}
+}
+
 int main(void)
 {
     halInit();
@@ -50,61 +109,19 @@ int main(void)
     //inits the motors
     motors_init();
 
-    VL53L0X_start();
-    dcmi_start();
-    po8030_start();
-    process_image_start();
+   VL53L0X_start();
+   dcmi_start();
+   po8030_start();
+   dac_start();
+   playMelodyStart();
 
-    int32_t compteur = 0;
-    uint8_t num_cible = 0;
-    int selector = 0;
-    bool target = 0; //indique si on a une cible acquise ou non
-    init_tab_cible();
+   chThdCreateStatic(selector_thd_wa, sizeof(selector_thd_wa), NORMALPRIO, selector_thd, NULL);
 
-    while(1)
+   while(1)
     {
-    	selector = get_selector();
-    	if(selector==0)
-    	{
-    		palClearPad(GPIOB, GPIOB_LED_BODY);
-    	}
-    	else
-    	{
-    		//partie pour la cible
-    		compteur = right_motor_get_pos();
-
-
-    		return_cible(compteur, target);
-    		//chprintf((BaseSequentialStream *)&SD3, "mesure = %d mm cible %d = \n", mesure, cible);
-
-    		if(compteur==TOUR)
-    		{
-    			target=1;
-    			direction_cible(num_cible);
-    		}
-
-
-
-
-    		//partie pour la caméra
-    		if(get_action())
-    		{
-    			while(right_motor_get_pos()<650)
-    			{
-    				right_motor_set_speed(400);
-    				left_motor_set_speed(-400);
-    			}
-    		}
-    		else
-    		{
-    			right_motor_set_speed(0);
-    			left_motor_set_speed(0);
-    		}
-    		chThdSleepMilliseconds(1000);
-    	}
+	   chThdSleepMilliseconds(1000);
     }
 }
-
 
 #define STACK_CHK_GUARD 0xe2dee396
 uintptr_t __stack_chk_guard = STACK_CHK_GUARD;
