@@ -75,13 +75,13 @@ void return_cible(int32_t compteur, bool target)
 	}
 }
 
-void direction_cible(uint8_t num_cible)
+void direction_cible(uint8_t num_cible, bool target)
 {
-	tri_croissant();
+	if(!target)
+		tri_croissant();
 	for(int i=0; i<NB_CIBLES; i++)
-		chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
-	chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[num_cible].orientation, (tab_cible[num_cible].distance));
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
 		while(left_motor_get_pos()<=(TOUR-tab_cible[num_cible].orientation)){
@@ -142,15 +142,21 @@ uint32_t get_orientation(uint8_t cible)
 	return tab_cible[cible].orientation;
 }
 
-void relative_orientation(uint8_t cible, uint32_t difference)
+void relative_orientation(uint8_t cible, int32_t difference)
 {
-	tab_cible[cible].orientation = abs(tab_cible[cible].orientation - difference);
-	chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d cible = %d\n", difference, tab_cible[cible].orientation, cible);
+	if(tab_cible[cible].orientation < difference)
+		tab_cible[cible].orientation = (TOUR - abs(tab_cible[cible].orientation - difference));
+	else if(tab_cible[cible].orientation > difference)
+		tab_cible[cible].orientation = abs(tab_cible[cible].orientation - difference);
+	chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d distance = %d cible = %d\n", difference, tab_cible[cible].orientation, tab_cible[cible].distance, cible);
+	for(int i=0; i<NB_CIBLES; i++)
+			chprintf((BaseSequentialStream *)&SD3, "rel orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+
 }
 
 uint16_t get_step(uint16_t distance)
 {
-	return (distance*STEP_ONE_TURN/WHEEL_PERIMETER);
+	return (distance*STEP_ONE_TURN/WHEEL_PERIMETER-5);
 }
 
 int16_t pi_regulator(void)

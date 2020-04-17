@@ -25,7 +25,7 @@ extern "C" {
 #define VITESSE_STRIKE			1000
 #define VITESSE_SCAN				400
 #define POSITION_RESET			0
-#define WHEEL_PERIMETER			145
+#define WHEEL_PERIMETER			148
 #define STEP_ONE_TURN			1000
 #define VITESSE_STANDARD			500
 

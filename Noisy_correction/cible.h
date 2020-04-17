@@ -22,14 +22,14 @@ typedef struct {
 void init_tab_cible(void);
 void tri_croissant(void);
 void return_cible(int32_t compteur, bool target);
-void direction_cible(uint8_t num_cible);
+void direction_cible(uint8_t num_cible, bool target);
 void action_cible(int16_t speed, uint8_t cible);
 int16_t pi_regulator(void);
 void ennemy(void);
 void reset_motor(void);
 uint16_t get_step(uint16_t distance);
 uint32_t get_orientation(uint8_t cible);
-void relative_orientation(uint8_t cible, uint32_t difference);
+void relative_orientation(uint8_t cible, int32_t difference);
 uint8_t nb_cibles(void);
 
 #endif /* CIBLE_H_ */

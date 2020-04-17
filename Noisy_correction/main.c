@@ -79,14 +79,13 @@ static THD_FUNCTION(selector_thd, arg)
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
 			}
-			chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
+			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
 			if(compteur==TOUR || target)
 			{
 				while(num_cible < nombre_cibles)
 				{
-					target = 1;
-
-    			    		direction_cible(num_cible);
+    			    		direction_cible(num_cible, target);
+    					target = 1;
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		capture_image();
 
@@ -98,14 +97,15 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(-VITESSE_STANDARD, num_cible);
 
 			    		difference = get_orientation(num_cible);
-    			    		if(num_cible < (nombre_cibles - 1))
-    			    		{
+    			    		//if(num_cible < (nombre_cibles - 1))
+    			    		//{
     			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
-    			    		}
+    			    		//}
 
     			    		reset_motor();
 				}
+				//reset_motor();
 			}
 		}
 	}
