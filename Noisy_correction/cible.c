@@ -9,6 +9,7 @@
 #include <math.h>
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
+//static uint16_t count = 0;
 
 void init_tab_cible(void)
 {
@@ -45,9 +46,6 @@ void tri_croissant(void)
 
 void return_cible(int32_t compteur, bool target)
 {
-	bool identique = 0, state = 0;
-	uint8_t indice = 0;
-	uint16_t mesure = VL53L0X_get_dist_mm();
 	if(compteur<TOUR && !target)
 	{
 	    right_motor_set_speed(400);
@@ -55,36 +53,21 @@ void return_cible(int32_t compteur, bool target)
 
 	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    		if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
-	    			for(uint8_t i=0; i<NB_CIBLES; i++)
-	    			{
-	    				if(abs(VL53L0X_get_dist_mm()-tab_cible[i].distance) < 100 && abs(compteur-tab_cible[i].orientation) < 60)
-	    				{
-	    					identique = 1;
-	    					if(VL53L0X_get_dist_mm() < tab_cible[i].distance)
-	    						state = 1;
-	    					else
-	    						mesure = tab_cible[i].distance ;
-	    					indice = i;
-	    				}
-	    			}
-	    		if(!identique)
+	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (compteur<tab_cible[NB_CIBLES-1].orientation+100))
+	    	{
+	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    		tab_cible[NB_CIBLES-1].orientation = compteur;
+	    	}
+	    	else if(compteur > tab_cible[NB_CIBLES-1].orientation+100)
+	    	{
+	    		tri_croissant();
+	    		if(VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance)
 	    		{
 	    			tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
 	    			tab_cible[NB_CIBLES-1].orientation = compteur;
-	    			tri_croissant();
-	    			chprintf((BaseSequentialStream *)&SD3, "compteur %d \n", compteur);
-	    	  	}
-	    		else
-	    		{
-	    			if(state)
-	    			{
-	    				tab_cible[indice].distance = mesure;
-	    				tab_cible[indice].orientation = compteur;
-	    				tri_croissant();
-	    			}
 	    		}
 	    	}
+	    }
 	}
  	else if(compteur==TOUR)
 	{
@@ -96,9 +79,9 @@ void return_cible(int32_t compteur, bool target)
 
 void direction_cible(uint8_t num_cible)
 {
+	tri_croissant();
 	for(int i=0; i<NB_CIBLES; i++)
 		chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
-	tri_croissant(); //ordonne tableau dans ordre croissant
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
@@ -160,7 +143,7 @@ int16_t pi_regulator(void)
 	static float sum_error = 0;
 
 	error = CONSIGNE - VL53L0X_get_dist_mm();
-	chprintf((BaseSequentialStream *)&SD3, "error = %f mesure %d\n", error, VL53L0X_get_dist_mm());
+	//chprintf((BaseSequentialStream *)&SD3, "error = %f mesure %d\n", error, VL53L0X_get_dist_mm());
 
 	if(error >= (-ERROR_THRESHOLD) && error <= 0)
 		return 0;

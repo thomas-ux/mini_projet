@@ -64,8 +64,7 @@ int main(void)
    uint8_t num_cible = 0;
    int selector = 0;
    bool target = 0;
-
-	init_tab_cible();
+   init_tab_cible();
 
    while(1)
     {
@@ -74,6 +73,9 @@ int main(void)
 	   {
 		   palSetPad(GPIOB, GPIOB_LED_BODY);
 		   reset_motor();
+		   target = 0;
+
+		   init_tab_cible();
 	   }
 	   else
 	   {
@@ -87,7 +89,7 @@ int main(void)
 		   {
     	    			target=1;
     	    			direction_cible(num_cible);
-    	    			//action_cible();
+    	    			action_cible();
     	    			//capture_image();
 
     	    			//if(get_action())
