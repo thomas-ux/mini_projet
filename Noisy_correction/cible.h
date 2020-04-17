@@ -23,10 +23,10 @@ void init_tab_cible(void);
 void tri_croissant(void);
 void return_cible(int32_t compteur, bool target);
 void direction_cible(uint8_t num_cible);
-void action_cible(void);
+void action_cible(int16_t speed, uint8_t cible);
 int16_t pi_regulator(void);
-void friend(int16_t speed, uint8_t num_cible);
 void ennemy(void);
 void reset_motor(void);
+uint16_t get_step(uint16_t distance);
 
 #endif /* CIBLE_H_ */

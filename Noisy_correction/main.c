@@ -58,6 +58,7 @@ static THD_FUNCTION(selector_thd, arg)
 	{
 		if(get_selector()==0)
 		{
+			 palClearPad(GPIOD, GPIOD_LED_FRONT);
 			 palSetPad(GPIOB, GPIOB_LED_BODY);
 			 reset_motor();
 			 target = 0;
@@ -67,6 +68,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
 		   //bool target = 0;
 		   compteur = right_motor_get_pos();
 
@@ -76,16 +78,17 @@ static THD_FUNCTION(selector_thd, arg)
 		   {
 			   target=1;
     			   direction_cible(num_cible);
-    			   action_cible();
+    			   action_cible(VITESSE_STANDARD, num_cible);
     			   capture_image();
 
     			   if(get_action())
     			   {
 		    			playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			   	   	ennemy();
+    			   	   	action_cible(-VITESSE_STANDARD, num_cible);
 		    	    	}
 		    	    	else
-		    	    		friend(-200, num_cible);
+		    	    		action_cible(-VITESSE_STANDARD, num_cible);
 		    	    	right_motor_set_pos(0);
 			}
 		}

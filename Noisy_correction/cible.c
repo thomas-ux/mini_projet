@@ -9,7 +9,6 @@
 #include <math.h>
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
-//static uint16_t count = 0;
 
 void init_tab_cible(void)
 {
@@ -48,34 +47,33 @@ void return_cible(int32_t compteur, bool target)
 {
 	if(compteur<TOUR && !target)
 	{
-	    right_motor_set_speed(400);
-	    left_motor_set_speed(-400);
+	    right_motor_set_speed(VITESSE_SCAN);
+	    left_motor_set_speed(-VITESSE_SCAN);
 
 	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    	if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (compteur<tab_cible[NB_CIBLES-1].orientation+100))
-	    	{
-	    		tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    		tab_cible[NB_CIBLES-1].orientation = compteur;
-	    	}
-	    	else if(compteur > tab_cible[NB_CIBLES-1].orientation+100)
-	    	{
-	    		tri_croissant();
-	    		if(VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance)
+	    		if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (compteur<tab_cible[NB_CIBLES-1].orientation+100))
 	    		{
 	    			tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
 	    			tab_cible[NB_CIBLES-1].orientation = compteur;
 	    		}
-	    	}
+	    		else if(compteur > tab_cible[NB_CIBLES-1].orientation+100)
+	    		{
+	    			tri_croissant();
+	    			if(VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    			}
+	    		}
 	    }
 	}
  	else if(compteur==TOUR)
 	{
- 		right_motor_set_speed(0);
-	    left_motor_set_speed(0);
+ 		right_motor_set_speed(VITESSE_NULLE);
+	    left_motor_set_speed(VITESSE_NULLE);
 	}
 }
-
 
 void direction_cible(uint8_t num_cible)
 {
@@ -100,38 +98,47 @@ void direction_cible(uint8_t num_cible)
 	left_motor_set_speed(VITESSE_NULLE);
 }
 
-void action_cible(void)
+void action_cible(int16_t speed, uint8_t cible)
 {
-	while(pi_regulator())
+	//while(pi_regulator())
+	//{
+		//right_motor_set_speed(pi_regulator());
+		//left_motor_set_speed(pi_regulator());
+	//}
+	right_motor_set_pos(POSITION_RESET);
+	if(speed>0)
 	{
-		right_motor_set_speed(pi_regulator());
-		left_motor_set_speed(pi_regulator());
+		while(right_motor_get_pos()<get_step(tab_cible[cible].distance))
+		{
+			right_motor_set_speed(speed);
+			left_motor_set_speed(speed);
+		}
+	}
+	else
+	{
+		while((-right_motor_get_pos())<get_step(tab_cible[cible].distance))
+		{
+			right_motor_set_speed(speed);
+			left_motor_set_speed(speed);
+		}
 	}
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
 }
 
-void friend(int16_t speed, uint8_t num_cible)
-{
-	while(VL53L0X_get_dist_mm() < tab_cible[num_cible].distance)
-	{
-		right_motor_set_speed(speed);
-	    left_motor_set_speed(speed);
-	}
-	right_motor_set_speed(VITESSE_NULLE);
-    left_motor_set_speed(VITESSE_NULLE);
-}
-
 void ennemy(void)
 {
 	right_motor_set_pos(0);
-	while(right_motor_get_pos()<650)
+	while((-right_motor_get_pos())<TOUR)
 	{
 		right_motor_set_speed(-VITESSE_STRIKE);
     	   	left_motor_set_speed(VITESSE_STRIKE);
 	}
-	right_motor_set_speed(VITESSE_NULLE);
-    left_motor_set_speed(VITESSE_NULLE);
+}
+
+uint16_t get_step(uint16_t distance)
+{
+	return (distance*STEP_ONE_TURN/WHEEL_PERIMETER);
 }
 
 int16_t pi_regulator(void)
