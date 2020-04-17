@@ -81,6 +81,7 @@ void direction_cible(uint8_t num_cible)
 	for(int i=0; i<NB_CIBLES; i++)
 		chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
+	chprintf((BaseSequentialStream *)&SD3, " orientation = %d distance = %d\n", tab_cible[num_cible].orientation, (tab_cible[num_cible].distance));
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
 		while(left_motor_get_pos()<=(TOUR-tab_cible[num_cible].orientation)){
@@ -136,6 +137,17 @@ void ennemy(void)
 	}
 }
 
+uint32_t get_orientation(uint8_t cible)
+{
+	return tab_cible[cible].orientation;
+}
+
+void relative_orientation(uint8_t cible, uint32_t difference)
+{
+	tab_cible[cible].orientation = abs(tab_cible[cible].orientation - difference);
+	chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d cible = %d\n", difference, tab_cible[cible].orientation, cible);
+}
+
 uint16_t get_step(uint16_t distance)
 {
 	return (distance*STEP_ONE_TURN/WHEEL_PERIMETER);
@@ -165,6 +177,15 @@ int16_t pi_regulator(void)
 	speed = -(KP * error + KI * sum_error);
 
     return (int16_t)speed;
+}
+
+uint8_t nb_cibles(void)
+{
+	uint8_t nombre = 0;
+	for(uint8_t i=0; i<NB_CIBLES; i++)
+		if(tab_cible[i].distance < DISTANCE_MAX)
+			nombre++;
+	return nombre;
 }
 
 void reset_motor(void)

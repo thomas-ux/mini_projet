@@ -24,13 +24,12 @@ void capture_image(void)
 	//waits for the capture to be done
 	wait_image_ready();
 	image_process();
-	//for(uint16_t i = (2*300) ; i < (2 * 500) ; i+=2)
+	//for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
 	//	chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
 }
 
 void image_process(void)
 {
-
 	uint8_t *img_buff_ptr;
 	for(uint16_t k=0; k<IMAGE_BUFFER_SIZE; k++)
 		image[k] = 0;
@@ -41,7 +40,7 @@ void image_process(void)
 		img_buff_ptr = dcmi_get_last_image_ptr();
 
 		//Extracts only the red pixels
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
+		for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
 		{
 			//extracts first 5bits of the first byte
 			//takes nothing from the second byte
@@ -61,7 +60,7 @@ uint16_t get_action(void)
 	uint16_t noir = 0, blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
-		if(image[i/2]<32)
+		if(image[i/2]<=32)
 			noir++;
 		if(image[i/2]>=40)
 			blanc++;

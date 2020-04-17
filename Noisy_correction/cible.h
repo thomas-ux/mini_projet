@@ -28,5 +28,8 @@ int16_t pi_regulator(void);
 void ennemy(void);
 void reset_motor(void);
 uint16_t get_step(uint16_t distance);
+uint32_t get_orientation(uint8_t cible);
+void relative_orientation(uint8_t cible, uint32_t difference);
+uint8_t nb_cibles(void);
 
 #endif /* CIBLE_H_ */
