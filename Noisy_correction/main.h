@@ -27,7 +27,7 @@ extern "C" {
 #define POSITION_RESET			0
 #define WHEEL_PERIMETER			148
 #define STEP_ONE_TURN			1000
-#define VITESSE_STANDARD			500
+#define VITESSE_STANDARD			600
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

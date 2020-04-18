@@ -81,7 +81,6 @@ static THD_FUNCTION(selector_thd, arg)
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
 			}
-			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
 			if(compteur==TOUR || target)
 			{
 				while(num_cible < nombre_cibles)

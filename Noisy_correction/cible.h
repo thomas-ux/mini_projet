@@ -8,9 +8,9 @@
 #ifndef CIBLE_H_
 #define CIBLE_H_
 
-#define DISTANCE_MAX		400 //en mm (au max une cible peut se trouver à 1m de distance)
+#define DISTANCE_MAX		300 //en mm (au max une cible peut se trouver à 1m de distance)
 #define TOUR				1300
-#define NB_CIBLES		5
+#define NB_CIBLES		6
 #define CONSIGNE			22
 
 typedef struct {
@@ -20,7 +20,8 @@ typedef struct {
 } etat_cible;
 
 void init_tab_cible(void);
-void tri_croissant(void);
+void tri_croissant_distance(void);
+void tri_croissant_orientation(void);
 void return_cible(int32_t compteur, bool target);
 void direction_cible(uint8_t num_cible, bool target);
 void action_cible(int16_t speed, uint8_t cible);
