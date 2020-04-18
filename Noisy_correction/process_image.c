@@ -55,7 +55,7 @@ void image_process(void)
 		send_to_computer = !send_to_computer;
 }
 
-uint16_t get_action(void)
+uint16_t get_action(bool couleur)
 {
 	uint16_t noir = 0, blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
@@ -66,8 +66,16 @@ uint16_t get_action(void)
 			blanc++;
 	}
 	chprintf((BaseSequentialStream *)&SD3, "noir = %d blanc = %d\n", noir, blanc);
-	if(noir>blanc)
-		return 1;
+	if(!couleur)
+	{
+		if(noir>blanc)
+			return 1;
+		else
+			return 0;
+	}
 	else
-		return 0;
+		if(blanc>noir)
+			return 1;
+		else
+			return 0;
 }

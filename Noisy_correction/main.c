@@ -73,13 +73,7 @@ static THD_FUNCTION(selector_thd, arg)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
-			reset_motor();
-			target = 0;
-			compteur = 0;
-    		    num_cible = 0;
-    		    difference = 0;
-    		    nombre_cibles = 0;
-    		    init_tab_cible();
+			couleur = 0;
 
 			if(!target)
 			{
@@ -97,13 +91,13 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		capture_image();
 
-    			    		if(get_action())
+    			    		if(get_action(couleur))
     			    		{
     			    			playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		if(get_action())
+    			    		if(get_action(couleur))
     			    			stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
@@ -122,13 +116,7 @@ static THD_FUNCTION(selector_thd, arg)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
-			reset_motor();
-			target = 0;
-			compteur = 0;
-    		    num_cible = 0;
-    		    difference = 0;
-    		    nombre_cibles = 0;
-    		    init_tab_cible();
+    		    couleur = 1;
 
 			if(!target)
 			{
@@ -146,13 +134,13 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		capture_image();
 
-    			    		if(get_action())
+    			    		if(get_action(couleur))
     			    		{
     			    			playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		if(get_action())
+    			    		if(get_action(couleur))
     			    			stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
