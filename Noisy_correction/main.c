@@ -51,7 +51,7 @@ static THD_FUNCTION(selector_thd, arg)
 
     int32_t compteur = 0, difference = 0;
     uint8_t num_cible = 0, nombre_cibles = 0;
-    bool target = 0;
+    bool target = 0, couleur = 0;
     init_tab_cible();
 
 	while(1)
@@ -69,10 +69,18 @@ static THD_FUNCTION(selector_thd, arg)
 			 nombre_cibles = 0;
 			 init_tab_cible();
 		}
-		else
+		else if(get_selector()>=1 && get_selector()<8)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
+			reset_motor();
+			target = 0;
+			compteur = 0;
+    		    num_cible = 0;
+    		    difference = 0;
+    		    nombre_cibles = 0;
+    		    init_tab_cible();
+
 			if(!target)
 			{
 				compteur = right_motor_get_pos();
@@ -91,17 +99,68 @@ static THD_FUNCTION(selector_thd, arg)
 
     			    		if(get_action())
     			    		{
-    			    			//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    			    			playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
     			    		action_cible(-VITESSE_STANDARD, num_cible);
+    			    		if(get_action())
+    			    			stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
-    			    		//if(num_cible < (nombre_cibles - 1))
-    			    		//{
+    			    		if(num_cible < (NB_CIBLES-1))
+    			    		{
     			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
-    			    		//}
+    			    		}
+
+    			    		reset_motor();
+				}
+				//reset_motor();
+			}
+		}
+		else
+		{
+			palClearPad(GPIOB, GPIOB_LED_BODY);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
+			reset_motor();
+			target = 0;
+			compteur = 0;
+    		    num_cible = 0;
+    		    difference = 0;
+    		    nombre_cibles = 0;
+    		    init_tab_cible();
+
+			if(!target)
+			{
+				compteur = right_motor_get_pos();
+		    		return_cible(compteur, target);
+		    		nombre_cibles = nb_cibles();
+			}
+			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
+			if(compteur==TOUR || target)
+			{
+				while(num_cible < nombre_cibles)
+				{
+    			    		direction_cible(num_cible, target);
+    					target = 1;
+    			    		action_cible(VITESSE_STANDARD, num_cible);
+    			    		capture_image();
+
+    			    		if(get_action())
+    			    		{
+    			    			playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
+    			    			ennemy();
+    			    		}
+    			    		action_cible(-VITESSE_STANDARD, num_cible);
+    			    		if(get_action())
+    			    			stopCurrentMelody();
+
+			    		difference = get_orientation(num_cible);
+    			    		if(num_cible < (NB_CIBLES-1))
+    			    		{
+    			    			num_cible += 1;
+    			    			relative_orientation(num_cible, difference);
+    			    		}
 
     			    		reset_motor();
 				}

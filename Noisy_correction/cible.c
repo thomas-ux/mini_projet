@@ -16,6 +16,7 @@ void init_tab_cible(void)
 	{
 		tab_cible[i].distance = DISTANCE_MAX;
 		tab_cible[i].orientation = 0;
+		tab_cible[i].old_orientation = 0;
 	}
 }
 
@@ -39,6 +40,7 @@ void tri_croissant(void)
 		tab_cible[i_min].orientation = tab_cible[j].orientation;
 		tab_cible[j].distance = min;
 		tab_cible[j].orientation = position;
+		tab_cible[j].old_orientation = tab_cible[j].orientation;
 		min = DISTANCE_MAX;
 	}
 }
@@ -139,7 +141,7 @@ void ennemy(void)
 
 uint32_t get_orientation(uint8_t cible)
 {
-	return tab_cible[cible].orientation;
+	return tab_cible[cible].old_orientation;
 }
 
 void relative_orientation(uint8_t cible, int32_t difference)
@@ -148,9 +150,9 @@ void relative_orientation(uint8_t cible, int32_t difference)
 		tab_cible[cible].orientation = (TOUR - abs(tab_cible[cible].orientation - difference));
 	else if(tab_cible[cible].orientation > difference)
 		tab_cible[cible].orientation = abs(tab_cible[cible].orientation - difference);
-	chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d distance = %d cible = %d\n", difference, tab_cible[cible].orientation, tab_cible[cible].distance, cible);
-	for(int i=0; i<NB_CIBLES; i++)
-			chprintf((BaseSequentialStream *)&SD3, "rel orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	//chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d distance = %d cible = %d\n", difference, tab_cible[cible].orientation, tab_cible[cible].distance, cible);
+	//for(int i=0; i<NB_CIBLES; i++)
+		//	chprintf((BaseSequentialStream *)&SD3, "rel orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 }
 

@@ -24,8 +24,8 @@ void capture_image(void)
 	//waits for the capture to be done
 	wait_image_ready();
 	image_process();
-	//for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
-	//	chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
+	for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
+		chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
 }
 
 void image_process(void)
@@ -60,11 +60,12 @@ uint16_t get_action(void)
 	uint16_t noir = 0, blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
-		if(image[i/2]<=32)
+		if(image[i/2]<=48)
 			noir++;
-		if(image[i/2]>=40)
+		if(image[i/2]>=136)
 			blanc++;
 	}
+	chprintf((BaseSequentialStream *)&SD3, "noir = %d blanc = %d\n", noir, blanc);
 	if(noir>blanc)
 		return 1;
 	else
