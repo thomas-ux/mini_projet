@@ -88,11 +88,12 @@ static THD_FUNCTION(selector_thd, arg)
     			    		direction_cible(num_cible, target);
     					target = 1;
     			    		action_cible(VITESSE_STANDARD, num_cible);
+    			    		correction_orientation();
     			    		capture_image();
 
     			    		if(get_action(couleur))
     			    		{
-    			    			playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
+    			    			//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
     			    		action_cible(-VITESSE_STANDARD, num_cible);
@@ -135,7 +136,7 @@ static THD_FUNCTION(selector_thd, arg)
 
     			    		if(get_action(couleur))
     			    		{
-    			    			playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
+    			    			//playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
     			    		action_cible(-VITESSE_STANDARD, num_cible);

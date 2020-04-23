@@ -10,7 +10,7 @@
 
 #define DISTANCE_MAX		300 //en mm (au max une cible peut se trouver à 1m de distance)
 #define TOUR				1300
-#define NB_CIBLES		6
+#define NB_CIBLES		5
 #define CONSIGNE			22
 
 typedef struct {
@@ -30,6 +30,7 @@ void ennemy(void);
 void reset_motor(void);
 uint16_t get_step(uint16_t distance);
 uint32_t get_orientation(uint8_t cible);
+void correction_orientation(void);
 void relative_orientation(uint8_t cible, int32_t difference);
 uint8_t nb_cibles(void);
 
