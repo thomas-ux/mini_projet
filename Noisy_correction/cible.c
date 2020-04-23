@@ -10,6 +10,9 @@
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
 
+uint16_t distance_min = DISTANCE_MAX;
+int32_t orientation_correction = 0;
+
 void init_tab_cible(void)
 {
 	for(int i=0; i<NB_CIBLES; i++)
@@ -159,7 +162,7 @@ void action_cible(int16_t speed, uint8_t cible)
 	}
 	else
 	{
-		while((-right_motor_get_pos())<get_step(tab_cible[cible].distance))
+		while((-right_motor_get_pos())<(get_step(tab_cible[cible].distance)-310))
 		{
 			right_motor_set_speed(speed);
 			left_motor_set_speed(speed);
@@ -198,8 +201,8 @@ void relative_orientation(uint8_t cible, int32_t difference)
 
 void correction_orientation(void)
 {
-	uint16_t distance_min = DISTANCE_MAX;
-	int32_t orientation_correction = 0;
+	distance_min = DISTANCE_MAX;
+	orientation_correction = 0;
 	left_motor_set_pos(0);
 	while((-left_motor_get_pos())<=(TOUR/5))
 	{
@@ -232,6 +235,34 @@ void correction_orientation(void)
 
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
+}
+
+void retour_scan(void)
+{
+	right_motor_set_pos(POSITION_RESET);
+	while((-right_motor_get_pos())<get_step(distance_min))
+	{
+		right_motor_set_speed(-VITESSE_STANDARD);
+		left_motor_set_speed(-VITESSE_STANDARD);
+	}
+	chprintf((BaseSequentialStream *)&SD3, "orientation correction = %d\n", orientation_correction);
+	left_motor_set_pos(POSITION_RESET);
+	if(orientation_correction<(TOUR/5))
+	{
+		while(left_motor_get_pos()<orientation_correction)
+		{
+			right_motor_set_speed(-VITESSE_SCAN);
+			left_motor_set_speed(VITESSE_SCAN);
+		}
+	}
+	else if(orientation_correction>(TOUR/5))
+	{
+		while((-left_motor_get_pos())<(orientation_correction-TOUR/5))
+		{
+			right_motor_set_speed(VITESSE_SCAN);
+			left_motor_set_speed(-VITESSE_SCAN);
+		}
+	}
 }
 
 uint16_t get_step(uint16_t distance)

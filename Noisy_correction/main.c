@@ -96,6 +96,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    			//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
+    			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
     			    		if(get_action(couleur))
     			    			stopCurrentMelody();
@@ -139,6 +140,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    			//playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
+    			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
     			    		if(get_action(couleur))
     			    			stopCurrentMelody();

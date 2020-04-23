@@ -33,5 +33,6 @@ uint32_t get_orientation(uint8_t cible);
 void correction_orientation(void);
 void relative_orientation(uint8_t cible, int32_t difference);
 uint8_t nb_cibles(void);
+void retour_scan(void);
 
 #endif /* CIBLE_H_ */
