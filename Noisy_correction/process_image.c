@@ -65,7 +65,7 @@ uint16_t get_action(bool couleur)
 		if(image[i/2]>=120)
 			blanc++;
 	}
-	//chprintf((BaseSequentialStream *)&SD3, "noir = %d blanc = %d\n", noir, blanc);
+	chprintf((BaseSequentialStream *)&SD3, "noir = %d blanc = %d\n", noir, blanc);
 	if(!couleur)
 	{
 		if(noir>blanc)
