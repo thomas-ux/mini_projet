@@ -69,6 +69,7 @@ static THD_FUNCTION(selector_thd, arg)
 			 nombre_cibles = 0;
 			 init_tab_cible();
 		}
+
 		else if(get_selector()>=1 && get_selector()<8)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
@@ -80,6 +81,7 @@ static THD_FUNCTION(selector_thd, arg)
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
+		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
 			if(compteur==TOUR || target)
 			{
@@ -88,6 +90,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    		direction_cible(num_cible, target);
     					target = 1;
     			    		action_cible(VITESSE_STANDARD, num_cible);
+    			    		correction_orientation();
     			    		capture_image();
 
     			    		if(get_action(couleur))
@@ -95,6 +98,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    			//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
+    			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
     			    		if(get_action(couleur))
     			    			stopCurrentMelody();
@@ -114,7 +118,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
-			palSetPad(GPIOD, GPIOD_LED_FRONT);
+			//palSetPad(GPIOD, GPIOD_LED_FRONT);
     		    couleur = 1;
 
 			if(!target)
@@ -122,6 +126,7 @@ static THD_FUNCTION(selector_thd, arg)
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
+		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
 			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
 			if(compteur==TOUR || target)
@@ -129,7 +134,7 @@ static THD_FUNCTION(selector_thd, arg)
 				while(num_cible < nombre_cibles)
 				{
     			    		direction_cible(num_cible, target);
-    			    		target = 1;
+    					target = 1;
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		correction_orientation();
     			    		capture_image();
@@ -139,6 +144,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    			//playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
     			    		}
+    			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
     			    		if(get_action(couleur))
     			    			stopCurrentMelody();

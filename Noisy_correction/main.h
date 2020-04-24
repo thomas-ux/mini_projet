@@ -23,7 +23,7 @@ extern "C" {
 #define FENETRE_MAX				500
 #define VITESSE_NULLE			0
 #define VITESSE_STRIKE			1000
-#define VITESSE_SCAN				400
+#define VITESSE_SCAN				300
 #define POSITION_RESET			0
 #define WHEEL_PERIMETER			130
 #define STEP_ONE_TURN			1000

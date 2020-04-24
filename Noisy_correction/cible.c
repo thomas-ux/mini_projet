@@ -10,6 +10,9 @@
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
 
+uint16_t distance_min = DISTANCE_MAX;
+int32_t orientation_correction = 0;
+
 void init_tab_cible(void)
 {
 	for(int i=0; i<NB_CIBLES; i++)
@@ -24,7 +27,7 @@ void tri_croissant_distance(void)
 {
 	uint16_t min = DISTANCE_MAX;
 	uint8_t i_min = 0;
-	int32_t position = 0;
+	int32_t position = TOUR;
 	for(int j=0; j<NB_CIBLES-1; j++)
 	{
 		for(int i=j; i<NB_CIBLES; i++)
@@ -76,51 +79,91 @@ void return_cible(int32_t compteur, bool target)
 	{
 	    right_motor_set_speed(VITESSE_SCAN);
 	    left_motor_set_speed(-VITESSE_SCAN);
-
 	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    		if((VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance) && (compteur<tab_cible[NB_CIBLES-1].orientation+150)
-	    			&& compteur < 1200)
+	    if(compteur<(TOUR-100))
+	    {
+	    		if((abs(compteur-tab_cible[NB_CIBLES-1].orientation)<150))// || (abs(compteur-tab_cible[NB_CIBLES-1].orientation)>1150))
 	    		{
-	    			tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    			tab_cible[NB_CIBLES-1].orientation = compteur;
-	    		}
-	    		else if(compteur > (tab_cible[NB_CIBLES-1].orientation+150) && compteur<1200)
-	    		{
-	    			tri_croissant_distance();
-	    			if(VL53L0X_get_dist_mm() < tab_cible[NB_CIBLES-1].distance)
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
 	    			{
 	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
 	    				tab_cible[NB_CIBLES-1].orientation = compteur;
 	    			}
 	    		}
-	    		else if(compteur > 1200)
+	    		else
 	    		{
-	    			//for(int i=0; i<NB_CIBLES; i++)
-	    			//chprintf((BaseSequentialStream *)&SD3,"hello\n"); //"compt orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	    			tri_croissant_distance();
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    				//chprintf((BaseSequentialStream *)&SD3, "distance = %d compteur = %d\n", VL53L0X_get_dist_mm(), compteur);
+	    			}
+	    		}
+	    }
+	    else if(compteur>(TOUR-100) && compteur <TOUR)
+	    {
+	    		//chprintf((BaseSequentialStream *)&SD3, "min orientation = %d\n", min_orientation());
+	    		if(min_orientation()<100)										//cible identique autour de 0
+	    		{
+	    			//chprintf((BaseSequentialStream *)&SD3, "avant distance = %d compteur = %d\n", tab_cible[NB_CIBLES-1].distance, tab_cible[NB_CIBLES-1].orientation);
 	    			tri_croissant_orientation();
-	    			if((tab_cible[0].orientation < 100 || tab_cible[0].orientation == TOUR) && VL53L0X_get_dist_mm() < tab_cible[0].distance)
+	    			if(VL53L0X_get_dist_mm()<tab_cible[0].distance)
 	    			{
 	    				tab_cible[0].distance = VL53L0X_get_dist_mm();
 	    				tab_cible[0].orientation = compteur;
 	    			}
-	    			//tri_croissant_distance();
+	    		}
+	    		else if(abs(compteur-tab_cible[NB_CIBLES-1].orientation)<150)	//cible identique autour de 1200
+	    		{
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    			}
+			}
+	    		else
+	    		{
+	    			tri_croissant_distance();
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    			}
 	    		}
 	    }
+
 	}
- 	else if(compteur==TOUR)
+	}
+	else if(compteur==TOUR)
 	{
- 		right_motor_set_speed(VITESSE_NULLE);
-	    left_motor_set_speed(VITESSE_NULLE);
+		right_motor_set_speed(VITESSE_NULLE);
+		left_motor_set_speed(VITESSE_NULLE);
+		//for(int i=0; i<NB_CIBLES; i++)
+		//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 	}
+}
+
+int32_t min_orientation(void)
+{
+	int32_t min_orientation = TOUR;
+	for(int i=0; i<NB_CIBLES; i++)
+	{
+		if(tab_cible[i].orientation<min_orientation)
+		{
+			min_orientation = tab_cible[i].orientation;
+		}
+	}
+	return min_orientation;
 }
 
 void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	for(int i=0; i<NB_CIBLES; i++)
-		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	//for(int i=0; i<NB_CIBLES; i++)
+	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
@@ -137,19 +180,15 @@ void direction_cible(uint8_t num_cible, bool target)
 	}
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
+	chprintf((BaseSequentialStream *)&SD3, "left position = %d \n",left_motor_get_pos());
 }
 
 void action_cible(int16_t speed, uint8_t cible)
 {
-	//while(pi_regulator())
-	//{
-		//right_motor_set_speed(pi_regulator());
-		//left_motor_set_speed(pi_regulator());
-	//}
 	right_motor_set_pos(POSITION_RESET);
 	if(speed>0)
 	{
-		while(right_motor_get_pos()<get_step(tab_cible[cible].distance))
+		while(right_motor_get_pos()<(get_step(tab_cible[cible].distance)-310))
 		{
 			right_motor_set_speed(speed);
 			left_motor_set_speed(speed);
@@ -157,7 +196,7 @@ void action_cible(int16_t speed, uint8_t cible)
 	}
 	else
 	{
-		while((-right_motor_get_pos())<get_step(tab_cible[cible].distance))
+		while((-right_motor_get_pos())<(get_step(tab_cible[cible].distance)-310))
 		{
 			right_motor_set_speed(speed);
 			left_motor_set_speed(speed);
@@ -188,24 +227,20 @@ void relative_orientation(uint8_t cible, int32_t difference)
 		tab_cible[cible].orientation = (TOUR - abs(tab_cible[cible].orientation - difference));
 	else if(tab_cible[cible].orientation > difference)
 		tab_cible[cible].orientation = abs(tab_cible[cible].orientation - difference);
-	//chprintf((BaseSequentialStream *)&SD3, "difference = %d orientation = %d distance = %d cible = %d\n", difference, tab_cible[cible].orientation, tab_cible[cible].distance, cible);
-	//for(int i=0; i<NB_CIBLES; i++)
-		//	chprintf((BaseSequentialStream *)&SD3, "rel orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
-
 }
 
 void correction_orientation(void)
 {
-	uint16_t distance_min = DISTANCE_MAX;
-	int32_t orientation_correction = 0;
+	distance_min = DISTANCE_MAX;
+	orientation_correction = 0;
 	left_motor_set_pos(0);
-	while((-left_motor_get_pos())<=(TOUR/5))
+	while((-left_motor_get_pos())<=(TOUR/5-60))
 	{
 		right_motor_set_speed(VITESSE_SCAN);
 		left_motor_set_speed(-VITESSE_SCAN);
 	}
 	reset_motor();
-	while(left_motor_get_pos()<=(2*TOUR/5))
+	while(left_motor_get_pos()<=(2*TOUR/5-120))
 	{
 		right_motor_set_speed(-VITESSE_SCAN);
 		left_motor_set_speed(VITESSE_SCAN);
@@ -213,22 +248,52 @@ void correction_orientation(void)
 		{
 			distance_min = VL53L0X_get_dist_mm();
 			orientation_correction = left_motor_get_pos();
+			//chprintf((BaseSequentialStream *)&SD3, "distance = %d orientation %d\n", distance_min, orientation_correction);
 		}
 	}
 	reset_motor();
-	while((-left_motor_get_pos())<=((2*TOUR/5)-orientation_correction))
+	while((-left_motor_get_pos())<=((2*TOUR/5-120)-orientation_correction))
 	{
 		right_motor_set_speed(VITESSE_SCAN);
 		left_motor_set_speed(-VITESSE_SCAN);
 	}
 	reset_motor();
-	while(left_motor_get_pos()<get_step(distance_min))
+	while(left_motor_get_pos() < get_step(distance_min))
 	{
 		right_motor_set_speed(VITESSE_STANDARD);
 		left_motor_set_speed(VITESSE_STANDARD);
 	}
+
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
+}
+
+void retour_scan(void)
+{
+	right_motor_set_pos(POSITION_RESET);
+	while((-right_motor_get_pos())<get_step(distance_min))
+	{
+		right_motor_set_speed(-VITESSE_STANDARD);
+		left_motor_set_speed(-VITESSE_STANDARD);
+	}
+	//chprintf((BaseSequentialStream *)&SD3, "orientation correction = %d\n", orientation_correction);
+	left_motor_set_pos(POSITION_RESET);
+	if(orientation_correction<(TOUR/5-60))
+	{
+		while(left_motor_get_pos()<(TOUR/5-60 - orientation_correction))
+		{
+			right_motor_set_speed(-VITESSE_SCAN);
+			left_motor_set_speed(VITESSE_SCAN);
+		}
+	}
+	else if(orientation_correction>(TOUR/5-60))
+	{
+		while((-left_motor_get_pos())<(orientation_correction-(TOUR/5-60)))
+		{
+			right_motor_set_speed(VITESSE_SCAN);
+			left_motor_set_speed(-VITESSE_SCAN);
+		}
+	}
 }
 
 uint16_t get_step(uint16_t distance)
@@ -236,39 +301,22 @@ uint16_t get_step(uint16_t distance)
 	return ((distance-20)*STEP_ONE_TURN/WHEEL_PERIMETER);
 }
 
-int16_t pi_regulator(void)
-{
-
-	float error = 0, speed = 0;
-
-	static float sum_error = 0;
-
-	error = CONSIGNE - VL53L0X_get_dist_mm();
-	//chprintf((BaseSequentialStream *)&SD3, "error = %f mesure %d\n", error, VL53L0X_get_dist_mm());
-
-	if(error >= (-ERROR_THRESHOLD) && error <= 0)
-		return 0;
-
-	sum_error += error;
-
-	//we set a maximum and a minimum for the sum to avoid an uncontrolled growth
-	if(sum_error > MAX_SUM_ERROR)
-		sum_error = MAX_SUM_ERROR;
-	else if(sum_error < -MAX_SUM_ERROR)
-		sum_error = -MAX_SUM_ERROR;
-
-	speed = -(KP * error + KI * sum_error);
-
-    return (int16_t)speed;
-}
-
 uint8_t nb_cibles(void)
 {
 	uint8_t nombre = 0;
 	for(uint8_t i=0; i<NB_CIBLES; i++)
-		if(tab_cible[i].distance < DISTANCE_MAX)
+		if(tab_cible[i].distance < DISTANCE_MAX && tab_cible[i].orientation < TOUR)
 			nombre++;
 	return nombre;
+}
+
+void mvt_robot(int speed_right, int speed_left, int32_t compare_pos, int32_t comparant)
+{
+	while(compare_pos <= comparant)
+	{
+		right_motor_set_speed(speed_right);
+		left_motor_set_speed(speed_left);
+	}
 }
 
 void reset_motor(void)
