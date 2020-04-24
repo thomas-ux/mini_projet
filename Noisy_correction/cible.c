@@ -162,8 +162,8 @@ void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	for(int i=0; i<NB_CIBLES; i++)
-		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	//for(int i=0; i<NB_CIBLES; i++)
+	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
@@ -248,6 +248,7 @@ void correction_orientation(void)
 		{
 			distance_min = VL53L0X_get_dist_mm();
 			orientation_correction = left_motor_get_pos();
+			//chprintf((BaseSequentialStream *)&SD3, "distance = %d orientation %d\n", distance_min, orientation_correction);
 		}
 	}
 	reset_motor();

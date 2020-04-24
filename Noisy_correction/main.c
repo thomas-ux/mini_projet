@@ -118,7 +118,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
-			palSetPad(GPIOD, GPIOD_LED_FRONT);
+			//palSetPad(GPIOD, GPIOD_LED_FRONT);
     		    couleur = 1;
 
 			if(!target)
