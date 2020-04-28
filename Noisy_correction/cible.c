@@ -162,21 +162,17 @@ void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	for(int i=0; i<NB_CIBLES; i++)
-		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	//for(int i=0; i<NB_CIBLES; i++)
+	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
-	left_motor_set_pos(0);
-	if(tab_cible[num_cible].orientation >= (TOUR/2)){
-		while(left_motor_get_pos()<=(TOUR-tab_cible[num_cible].orientation)){
-			right_motor_set_speed(-VITESSE_SCAN);
-			left_motor_set_speed(VITESSE_SCAN);
-		}
+	left_motor_set_pos(POSITION_RESET);
+	if(tab_cible[num_cible].orientation >= (TOUR/2))
+	{
+		mvt_robot((-VITESSE_SCAN), VITESSE_SCAN, (TOUR-tab_cible[num_cible].orientation));
 	}
-	else{
-		while((-left_motor_get_pos())<=tab_cible[num_cible].orientation){
-			right_motor_set_speed(VITESSE_SCAN);
-			left_motor_set_speed(-VITESSE_SCAN);
-		}
+	else
+	{
+		mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), tab_cible[num_cible].orientation);
 	}
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
@@ -185,35 +181,17 @@ void direction_cible(uint8_t num_cible, bool target)
 
 void action_cible(int16_t speed, uint8_t cible)
 {
-	right_motor_set_pos(POSITION_RESET);
-	if(speed>0)
-	{
-		while(right_motor_get_pos()<(get_step(tab_cible[cible].distance)-310))
-		{
-			right_motor_set_speed(speed);
-			left_motor_set_speed(speed);
-		}
-	}
-	else
-	{
-		while((-right_motor_get_pos())<(get_step(tab_cible[cible].distance)-310))
-		{
-			right_motor_set_speed(speed);
-			left_motor_set_speed(speed);
-		}
-	}
+	left_motor_set_pos(POSITION_RESET);
+	mvt_robot(speed, speed, (get_step(tab_cible[cible].distance)-310));
+
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
 }
 
 void ennemy(void)
 {
-	right_motor_set_pos(0);
-	while((-right_motor_get_pos())<TOUR)
-	{
-		right_motor_set_speed(-VITESSE_STRIKE);
-    	   	left_motor_set_speed(VITESSE_STRIKE);
-	}
+	left_motor_set_pos(POSITION_RESET);
+	mvt_robot((-VITESSE_STRIKE), VITESSE_STRIKE, TOUR);
 }
 
 uint32_t get_orientation(uint8_t cible)
@@ -233,12 +211,10 @@ void correction_orientation(void)
 {
 	distance_min = DISTANCE_MAX;
 	orientation_correction = 0;
-	left_motor_set_pos(0);
-	while((-left_motor_get_pos())<=(TOUR/5-60))
-	{
-		right_motor_set_speed(VITESSE_SCAN);
-		left_motor_set_speed(-VITESSE_SCAN);
-	}
+
+	left_motor_set_pos(POSITION_RESET);
+	mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), (TOUR/5-60));
+
 	reset_motor();
 	while(left_motor_get_pos()<=(2*TOUR/5-120))
 	{
@@ -251,18 +227,12 @@ void correction_orientation(void)
 			//chprintf((BaseSequentialStream *)&SD3, "distance = %d orientation %d\n", distance_min, orientation_correction);
 		}
 	}
+
 	reset_motor();
-	while((-left_motor_get_pos())<=((2*TOUR/5-120)-orientation_correction))
-	{
-		right_motor_set_speed(VITESSE_SCAN);
-		left_motor_set_speed(-VITESSE_SCAN);
-	}
+	mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), ((2*TOUR/5-120)-orientation_correction));
+
 	reset_motor();
-	while(left_motor_get_pos() < get_step(distance_min))
-	{
-		right_motor_set_speed(VITESSE_STANDARD);
-		left_motor_set_speed(VITESSE_STANDARD);
-	}
+	mvt_robot(VITESSE_STANDARD, VITESSE_STANDARD, get_step(distance_min));
 
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
@@ -270,35 +240,24 @@ void correction_orientation(void)
 
 void retour_scan(void)
 {
-	right_motor_set_pos(POSITION_RESET);
-	while((-right_motor_get_pos())<get_step(distance_min))
-	{
-		right_motor_set_speed(-VITESSE_STANDARD);
-		left_motor_set_speed(-VITESSE_STANDARD);
-	}
+	left_motor_set_pos(POSITION_RESET);
+	mvt_robot((-VITESSE_STANDARD),(-VITESSE_STANDARD), get_step(distance_min));
+
 	//chprintf((BaseSequentialStream *)&SD3, "orientation correction = %d\n", orientation_correction);
 	left_motor_set_pos(POSITION_RESET);
 	if(orientation_correction<(TOUR/5-60))
 	{
-		while(left_motor_get_pos()<(TOUR/5-60 - orientation_correction))
-		{
-			right_motor_set_speed(-VITESSE_SCAN);
-			left_motor_set_speed(VITESSE_SCAN);
-		}
+		mvt_robot((-VITESSE_SCAN), VITESSE_SCAN, (TOUR/5-60 - orientation_correction));
 	}
 	else if(orientation_correction>(TOUR/5-60))
 	{
-		while((-left_motor_get_pos())<(orientation_correction-(TOUR/5-60)))
-		{
-			right_motor_set_speed(VITESSE_SCAN);
-			left_motor_set_speed(-VITESSE_SCAN);
-		}
+		mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), (orientation_correction-(TOUR/5-60)));
 	}
 }
 
 uint16_t get_step(uint16_t distance)
 {
-	return ((distance-25)*STEP_ONE_TURN/WHEEL_PERIMETER);
+	return ((distance-10)*STEP_ONE_TURN/WHEEL_PERIMETER);
 }
 
 uint8_t nb_cibles(void)
@@ -310,12 +269,23 @@ uint8_t nb_cibles(void)
 	return nombre;
 }
 
-void mvt_robot(int speed_right, int speed_left, int32_t compare_pos, int32_t comparant)
+void mvt_robot(int speed_right, int speed_left, int32_t comparant)
 {
-	while(compare_pos <= comparant)
+	if(speed_left>0)
 	{
-		right_motor_set_speed(speed_right);
-		left_motor_set_speed(speed_left);
+		while(left_motor_get_pos() <= comparant)
+		{
+			right_motor_set_speed(speed_right);
+			left_motor_set_speed(speed_left);
+		}
+	}
+	if(speed_left<0)
+	{
+		while((-left_motor_get_pos()) <= comparant)
+		{
+			right_motor_set_speed(speed_right);
+			left_motor_set_speed(speed_left);
+		}
 	}
 }
 
