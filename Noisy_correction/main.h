@@ -13,21 +13,15 @@ extern "C" {
 
 //constants for the differents parts of the project
 #define IMAGE_BUFFER_SIZE		640
-#define GOAL_DISTANCE 			10.0f
-#define MAX_DISTANCE 			25.0f
-#define ERROR_THRESHOLD			3.0f
-#define KP						3.0f
-#define KI 						0.002f	//must not be zero
-#define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT/KI)
 #define FENETRE_MIN				300
 #define FENETRE_MAX				500
 #define VITESSE_NULLE			0
 #define VITESSE_STRIKE			1000
-#define VITESSE_SCAN				300
+#define VITESSE_SCAN			300
 #define POSITION_RESET			0
 #define WHEEL_PERIMETER			130
 #define STEP_ONE_TURN			1000
-#define VITESSE_STANDARD			600
+#define VITESSE_STANDARD		600
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

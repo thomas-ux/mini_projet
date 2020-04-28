@@ -21,7 +21,6 @@
 #include "audio/audio_thread.h"
 #include "audio/play_melody.h"
 
-//.
 
 static THD_WORKING_AREA(selector_thd_wa, 2048);
 
@@ -79,9 +78,9 @@ static THD_FUNCTION(selector_thd, arg)
 			if(!target)
 			{
 				compteur = right_motor_get_pos();
-		    		return_cible(compteur, target);
-		    		nombre_cibles = nb_cibles();
-		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
+		    	return_cible(compteur, target);
+		    	nombre_cibles = nb_cibles();
+		    	//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
 			if(compteur==TOUR || target)
 			{
@@ -124,8 +123,8 @@ static THD_FUNCTION(selector_thd, arg)
 			if(!target)
 			{
 				compteur = right_motor_get_pos();
-		    		return_cible(compteur, target);
-		    		nombre_cibles = nb_cibles();
+		    	return_cible(compteur, target);
+		    	nombre_cibles = nb_cibles();
 		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
 			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
@@ -146,8 +145,8 @@ static THD_FUNCTION(selector_thd, arg)
     			    		}
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		if(get_action(couleur))
-    			    			stopCurrentMelody();
+    			    		//if(get_action(couleur))
+    			    			//stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
     			    		if(num_cible < (NB_CIBLES-1))
