@@ -100,8 +100,8 @@ static THD_FUNCTION(selector_thd, arg)
     			    		}
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		if(get_action(couleur))
-    			    			stopCurrentMelody();
+    			    		//if(get_action(couleur))
+    			    		//	stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
     			    		if(num_cible < (NB_CIBLES-1))
@@ -118,7 +118,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
-			//palSetPad(GPIOD, GPIOD_LED_FRONT);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
     		    couleur = 1;
 
 			if(!target)
@@ -146,8 +146,8 @@ static THD_FUNCTION(selector_thd, arg)
     			    		}
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		if(get_action(couleur))
-    			    			stopCurrentMelody();
+    			    		//if(get_action(couleur))
+    			    		//	stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
     			    		if(num_cible < (NB_CIBLES-1))

@@ -162,8 +162,8 @@ void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	//for(int i=0; i<NB_CIBLES; i++)
-	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	for(int i=0; i<NB_CIBLES; i++)
+		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 	left_motor_set_pos(0);
 	if(tab_cible[num_cible].orientation >= (TOUR/2)){
@@ -298,7 +298,7 @@ void retour_scan(void)
 
 uint16_t get_step(uint16_t distance)
 {
-	return ((distance-20)*STEP_ONE_TURN/WHEEL_PERIMETER);
+	return ((distance-25)*STEP_ONE_TURN/WHEEL_PERIMETER);
 }
 
 uint8_t nb_cibles(void)

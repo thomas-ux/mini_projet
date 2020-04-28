@@ -57,15 +57,15 @@ void image_process(void)
 
 uint16_t get_action(bool couleur)
 {
-	uint16_t noir = 0, blanc = 0;
+	uint16_t noir = 30, blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
-		if(image[i/2]<=48)
+		if(image[i/2]<=104)
 			noir++;
-		if(image[i/2]>=120)
+		if(image[i/2]>=136)
 			blanc++;
 	}
-	chprintf((BaseSequentialStream *)&SD3, "noir = %d blanc = %d\n", noir, blanc);
+	chprintf((BaseSequentialStream *)&SD3, "couleur = %d noir = %d blanc = %d\n", couleur, noir, blanc);
 	if(!couleur)
 	{
 		if(noir>blanc)
@@ -74,8 +74,10 @@ uint16_t get_action(bool couleur)
 			return 0;
 	}
 	else
+	{
 		if(blanc>noir)
 			return 1;
 		else
 			return 0;
+	}
 }
