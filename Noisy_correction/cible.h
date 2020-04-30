@@ -8,11 +8,6 @@
 #ifndef CIBLE_H_
 #define CIBLE_H_
 
-#define DISTANCE_MAX		300 //en mm (au max une cible peut se trouver à 1m de distance)
-#define TOUR				1300
-#define NB_CIBLES		5
-#define CONSIGNE			22
-
 typedef struct {
 	int32_t orientation;
 	uint16_t distance;

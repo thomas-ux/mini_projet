@@ -24,8 +24,8 @@ void capture_image(void)
 	//waits for the capture to be done
 	wait_image_ready();
 	image_process();
-	for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
-		chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
+	//for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
+	//	chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
 }
 
 void image_process(void)
@@ -55,14 +55,14 @@ void image_process(void)
 		send_to_computer = !send_to_computer;
 }
 
-uint16_t get_action(bool couleur)
+bool get_action(bool couleur)
 {
 	uint16_t noir = 0, blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
-		if(image[i/2]<=64)
+		if(image[i/2]<=SEUIL_NOIR)
 			noir++;
-		if(image[i/2]>=200)
+		if(image[i/2]>=SEUIL_BLANC)
 			blanc++;
 	}
 	chprintf((BaseSequentialStream *)&SD3, "couleur = %d noir = %d blanc = %d\n", couleur, noir, blanc);

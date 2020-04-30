@@ -68,6 +68,7 @@ static THD_FUNCTION(selector_thd, arg)
 			 difference = 0;
 			 nombre_cibles = 0;
 			 init_tab_cible();
+			 //chThdSleepMilliseconds(100);
 		}
 
 		else if(get_selector()>=1 && get_selector()<8)
@@ -94,26 +95,19 @@ static THD_FUNCTION(selector_thd, arg)
     			    		capture_image();
 
     			    		if(get_action(couleur))
-    			    		{
-    			    			//playMelody(IMPOSSIBLE_MISSION, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
-    			    		}
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		//if(get_action(couleur))
-    			    		//	stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
+    			    		num_cible += 1;
     			    		if(num_cible < (NB_CIBLES-1))
-    			    		{
-    			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
-    			    		}
 
     			    		reset_motor();
 				}
-				//reset_motor();
 			}
+			//chThdSleepMilliseconds(100);
 		}
 		else
 		{
@@ -140,26 +134,19 @@ static THD_FUNCTION(selector_thd, arg)
     			    		capture_image();
 
     			    		if(get_action(couleur))
-    			    		{
-    			    			//playMelody(SIMPSON, ML_SIMPLE_PLAY, NULL);
     			    			ennemy();
-    			    		}
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
-    			    		//if(get_action(couleur))
-    			    		//	stopCurrentMelody();
 
 			    		difference = get_orientation(num_cible);
+		    			num_cible += 1;
     			    		if(num_cible < (NB_CIBLES-1))
-    			    		{
-    			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
-    			    		}
 
     			    		reset_motor();
 				}
-				//reset_motor();
 			}
+			//chThdSleepMilliseconds(100);
 		}
 	}
 }
