@@ -65,7 +65,7 @@ bool get_action(bool couleur)
 		if(image[i/2]>=SEUIL_BLANC)
 			blanc++;
 	}
-	chprintf((BaseSequentialStream *)&SD3, "couleur = %d noir = %d blanc = %d\n", couleur, noir, blanc);
+	//chprintf((BaseSequentialStream *)&SD3, "couleur = %d noir = %d blanc = %d\n", couleur, noir, blanc);
 	if(!couleur)
 	{
 		if(noir>blanc)

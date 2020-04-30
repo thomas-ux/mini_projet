@@ -103,10 +103,8 @@ void return_cible(int32_t compteur, bool target)
 	    		}
 	    		else if(compteur>(TOUR-REBOUCLEMENT) && compteur<TOUR)
 	    		{
-	    			//chprintf((BaseSequentialStream *)&SD3, "min orientation = %d\n", min_orientation());
 	    			if(min_orientation()<REBOUCLEMENT)				//cible identique autour de 0
 	    			{
-	    				//chprintf((BaseSequentialStream *)&SD3, "avant distance = %d compteur = %d\n", tab_cible[NB_CIBLES-1].distance, tab_cible[NB_CIBLES-1].orientation);
 	    				tri_croissant_orientation();
 	    				if(VL53L0X_get_dist_mm()<tab_cible[0].distance)
 	    				{
@@ -138,8 +136,6 @@ void return_cible(int32_t compteur, bool target)
 	{
 		right_motor_set_speed(VITESSE_NULLE);
 		left_motor_set_speed(VITESSE_NULLE);
-		//for(int i=0; i<NB_CIBLES; i++)
-		//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 	}
 }
 
@@ -160,8 +156,8 @@ void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	for(int i=0; i<NB_CIBLES; i++)
-		chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
+	//for(int i=0; i<NB_CIBLES; i++)
+	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 	left_motor_set_pos(POSITION_RESET);
 	if(tab_cible[num_cible].orientation >= (TOUR/2))
@@ -181,7 +177,7 @@ void action_cible(int16_t speed, uint8_t cible)
 	left_motor_set_pos(POSITION_RESET);
 	float step = (RATIO_STEP*get_step(tab_cible[cible].distance));
 	chprintf((BaseSequentialStream *)&SD3, "get_step = %d\n", (int32_t)(step));
-	mvt_robot(speed, speed, (int32_t)(step));// - (uint16_t)((1/4)*tab_cible[cible].distance))));
+	mvt_robot(speed, speed, (int32_t)(step));
 
 	right_motor_set_speed(VITESSE_NULLE);
 	left_motor_set_speed(VITESSE_NULLE);
@@ -229,6 +225,7 @@ void correction_orientation(void)
 	reset_motor();
 	mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), ((2*FENETRE_SCAN)-orientation_correction));
 
+	palClearPad(GPIOD, GPIOD_LED_FRONT);
 	reset_motor();
 	mvt_robot(VITESSE_STANDARD, VITESSE_STANDARD, get_step(distance_min));
 

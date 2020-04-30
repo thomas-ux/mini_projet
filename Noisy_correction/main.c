@@ -74,7 +74,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else if(get_selector()>=1 && get_selector()<8)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
-			//palSetPad(GPIOD, GPIOD_LED_FRONT);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
 			couleur = 0;
 
 			if(!target)
@@ -82,7 +82,6 @@ static THD_FUNCTION(selector_thd, arg)
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
-		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
 			if(compteur==TOUR || target)
 			{
@@ -93,6 +92,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		correction_orientation();
     			    		capture_image();
+    					palSetPad(GPIOD, GPIOD_LED_FRONT);
 
     			    		if(get_action(couleur))
     			    			ennemy();
@@ -100,9 +100,13 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(-VITESSE_STANDARD, num_cible);
 
 			    		difference = get_orientation(num_cible);
-    			    		num_cible += 1;
     			    		if(num_cible < (NB_CIBLES-1))
+    			    		{
+    			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
+    			    		}
+    			    		else if(num_cible == (NB_CIBLES-1))
+    			    			num_cible += 1;
 
     			    		reset_motor();
 				}
@@ -112,7 +116,7 @@ static THD_FUNCTION(selector_thd, arg)
 		else
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
-			//palSetPad(GPIOD, GPIOD_LED_FRONT);
+			palSetPad(GPIOD, GPIOD_LED_FRONT);
     		    couleur = 1;
 
 			if(!target)
@@ -120,9 +124,7 @@ static THD_FUNCTION(selector_thd, arg)
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
-		    		//chprintf((BaseSequentialStream *)&SD3, "nb %d\n", nombre_cibles);
 			}
-			//chprintf((BaseSequentialStream *)&SD3, "nb = %d\n", nombre_cibles);
 			if(compteur==TOUR || target)
 			{
 				while(num_cible < nombre_cibles)
@@ -132,6 +134,7 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		correction_orientation();
     			    		capture_image();
+    					palSetPad(GPIOD, GPIOD_LED_FRONT);
 
     			    		if(get_action(couleur))
     			    			ennemy();
@@ -139,9 +142,13 @@ static THD_FUNCTION(selector_thd, arg)
     			    		action_cible(-VITESSE_STANDARD, num_cible);
 
 			    		difference = get_orientation(num_cible);
-		    			num_cible += 1;
     			    		if(num_cible < (NB_CIBLES-1))
+    			    		{
+    			    			num_cible += 1;
     			    			relative_orientation(num_cible, difference);
+    			    		}
+    			    		else if(num_cible == (NB_CIBLES-1))
+    			    			num_cible += 1;
 
     			    		reset_motor();
 				}
