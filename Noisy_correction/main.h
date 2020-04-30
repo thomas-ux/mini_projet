@@ -12,16 +12,29 @@ extern "C" {
 
 
 //constants for the differents parts of the project
-#define IMAGE_BUFFER_SIZE		640
-#define FENETRE_MIN				300
-#define FENETRE_MAX				500
+
+#define DISTANCE_MAX				300 //en mm (au max une cible peut se trouver à 1m de distance)
+#define TOUR						1300
+#define NB_CIBLES				5
 #define VITESSE_NULLE			0
 #define VITESSE_STRIKE			1000
-#define VITESSE_SCAN			300
+#define VITESSE_SCAN				300
+#define VITESSE_STANDARD			600
 #define POSITION_RESET			0
 #define WHEEL_PERIMETER			130
 #define STEP_ONE_TURN			1000
-#define VITESSE_STANDARD		600
+#define RATIO_STEP				0.7f
+#define FENETRE_SCAN				(TOUR/5-100)
+#define REBOUCLEMENT				100
+#define ECART_CIBLE				150
+
+#define IMAGE_BUFFER_SIZE		640
+#define FENETRE_MIN				270
+#define FENETRE_MAX				370
+#define SEUIL_BLANC				96
+#define SEUIL_NOIR				64
+
+
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
