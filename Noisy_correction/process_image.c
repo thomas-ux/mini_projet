@@ -34,25 +34,16 @@ void image_process(void)
 	for(uint16_t k=0; k<IMAGE_BUFFER_SIZE; k++)
 		image[k] = 0;
 
-	bool send_to_computer = true;
+	//gets the pointer to the array filled with the last image in RGB565
+	img_buff_ptr = dcmi_get_last_image_ptr();
 
-		//gets the pointer to the array filled with the last image in RGB565
-		img_buff_ptr = dcmi_get_last_image_ptr();
-
-		//Extracts only the red pixels
-		for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
-		{
-			//extracts first 5bits of the first byte
-			//takes nothing from the second byte
-			image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		}
-
-		if(send_to_computer){
-			//sends to the computer the image
-			//SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-		}
-		//invert the bool
-		send_to_computer = !send_to_computer;
+	//Extracts only the red pixels
+	for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
+	{
+		//extracts first 5bits of the first byte
+		//takes nothing from the second byte
+		image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
+	}
 }
 
 bool get_action(bool couleur)
