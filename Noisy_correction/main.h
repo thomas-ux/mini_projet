@@ -29,10 +29,9 @@ extern "C" {
 #define ECART_CIBLE				150
 
 #define IMAGE_BUFFER_SIZE		640
-#define FENETRE_MIN				270
-#define FENETRE_MAX				370
-#define SEUIL_BLANC				96
-#define SEUIL_NOIR				64
+#define FENETRE_MIN				0
+#define FENETRE_MAX				640
+#define SEUIL_BLANC				200
 
 
 
