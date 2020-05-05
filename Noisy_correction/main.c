@@ -49,7 +49,7 @@ static THD_FUNCTION(selector_thd, arg)
 
 	while(1)
 	{
-		if(get_selector()==0)
+		if(get_selector()==4)
 		{
 			 palClearPad(GPIOD, GPIOD_LED_FRONT);
 			 palSetPad(GPIOB, GPIOB_LED_BODY);
@@ -64,7 +64,7 @@ static THD_FUNCTION(selector_thd, arg)
 			 //chThdSleepMilliseconds(100);
 		}
 
-		else if(get_selector()>=1 && get_selector()<8)
+		else if(get_selector()>=5 && get_selector()<=15)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
@@ -106,7 +106,7 @@ static THD_FUNCTION(selector_thd, arg)
 			}
 			//chThdSleepMilliseconds(100);
 		}
-		else
+		else if(get_selector()>=0 && get_selector()<=3)
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
