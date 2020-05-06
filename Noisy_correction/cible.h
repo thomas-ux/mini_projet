@@ -3,6 +3,8 @@
  *
  *  Created on: Apr 13, 2020
  *      Author: manteauxthomas
+ *
+ *  Stockage des cibles et mouvements du robot pour les atteindre
  */
 
 #ifndef CIBLE_H_

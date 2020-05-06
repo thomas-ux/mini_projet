@@ -1,3 +1,12 @@
+/*
+ * main.h
+ *
+ *  Created on: Apr 13, 2020
+ *      Author: manteauxthomas
+ *
+ *  Gestion globale du programme avec les define, la thread du sélecteur et le main
+ */
+
 #ifndef MAIN_H
 #define MAIN_H
 
@@ -10,7 +19,7 @@ extern "C" {
 #include "msgbus/messagebus.h"
 #include "parameter/parameter.h"
 
-//constants for the differents parts of the project
+//constants for the different parts of the project
 
 #define DISTANCE_MAX				300 //en mm (au max une cible peut se trouver à 30cm de distance)
 #define TOUR						1300
@@ -24,7 +33,7 @@ extern "C" {
 #define STEP_ONE_TURN			1000
 #define RATIO_STEP				0.7f
 #define FENETRE_SCAN				(TOUR/5-100)
-#define REBOUCLEMENT				150
+#define REBOUCLEMENT				100
 #define ECART_CIBLE				150
 #define MARGE					15
 

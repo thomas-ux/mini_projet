@@ -1,3 +1,12 @@
+/*
+ * process_image.h
+ *
+ *  Created on: Apr 13, 2020
+ *      Author: manteauxthomas
+ *
+ *  Capture de l'image et analyse de la couleur
+ */
+
 #ifndef PROCESS_IMAGE_H
 #define PROCESS_IMAGE_H
 

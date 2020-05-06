@@ -1,3 +1,12 @@
+/*
+ * process_image.c
+ *
+ *  Created on: Apr 13, 2020
+ *      Author: manteauxthomas
+ *
+ *  Capture de l'image et analyse de la couleur
+ */
+
 #include "ch.h"
 #include "hal.h"
 #include <chprintf.h>

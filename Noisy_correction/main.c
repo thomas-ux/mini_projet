@@ -1,3 +1,12 @@
+/*
+ * main.c
+ *
+ *  Created on: Apr 13, 2020
+ *      Author: manteauxthomas
+ *
+ *  Gestion globale du programme avec les define, la thread du sélecteur et le main
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +57,7 @@ static THD_FUNCTION(selector_thd, arg)
 
 	while(1)
 	{
-		if(get_selector()==4)
+		if(get_selector()==4) // état initial
 		{
 			 palClearPad(GPIOD, GPIOD_LED_FRONT);
 			 palSetPad(GPIOB, GPIOB_LED_BODY);
@@ -60,114 +69,122 @@ static THD_FUNCTION(selector_thd, arg)
 			 difference = 0;
 			 nombre_cibles = 0;
 			 init_tab_cible();
-			 //chThdSleepMilliseconds(100);
 		}
 
-		else if(get_selector()>=5 && get_selector()<=15)
+		else if(get_selector()>=5 && get_selector()<=15) // mode d'attaque des cibles noires
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
-			couleur = 0;
+			couleur = 0; // attaquer les cibles noires
 
 			if(!target)
 			{
+				// remplissage du tableau de cibles
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
 			}
-			if(compteur==TOUR || target)
+			if(compteur==TOUR || target) // scan terminé
 			{
 				while(num_cible < nombre_cibles)
 				{
     			    		direction_cible(num_cible, target);
-    					target = 1;
+    					target = 1; // on se dirige vers une cible
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		correction_orientation();
     			    		capture_image();
+    			    		// on rallume la front_led une fois l'image prise
     					palSetPad(GPIOD, GPIOD_LED_FRONT);
 
-    			    		if(get_action(couleur))
+    			    		if(get_action(couleur)) // on attaque la cible si elle est noire
     			    			ennemy();
+    			    		// retour à la position initiale
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
 
+    			    		// passage à la cible suivante
 			    		difference = get_orientation(num_cible);
     			    		if(num_cible < (NB_CIBLES-1))
     			    		{
     			    			num_cible += 1;
+    			    			// calcul de l'orientation relative entre la prochaine cible et
+    			    			//la cible courante
     			    			relative_orientation(num_cible, difference);
     			    		}
-    			    		else if(num_cible == (NB_CIBLES-1))
+    			    		else if(num_cible == (NB_CIBLES-1)) // pas de prochaine cible
     			    			num_cible += 1;
 
     			    		reset_motor();
 				}
 			}
-			//chThdSleepMilliseconds(100);
 		}
-		else if(get_selector()>=0 && get_selector()<=3)
+		else if(get_selector()>=0 && get_selector()<=3) // mode d'attaque des cibles balnches
 		{
 			palClearPad(GPIOB, GPIOB_LED_BODY);
 			palSetPad(GPIOD, GPIOD_LED_FRONT);
-    		    couleur = 1;
+    		    couleur = 1; // attaquer les cibles blanches
 
 			if(!target)
 			{
+				//remplissage du tableau de cibles
 				compteur = right_motor_get_pos();
 		    		return_cible(compteur, target);
 		    		nombre_cibles = nb_cibles();
 			}
-			if(compteur==TOUR || target)
+			if(compteur==TOUR || target) // scan terminé
 			{
 				while(num_cible < nombre_cibles)
 				{
     			    		direction_cible(num_cible, target);
-    					target = 1;
+    					target = 1; // on se dirige vers une cible
     			    		action_cible(VITESSE_STANDARD, num_cible);
     			    		correction_orientation();
     			    		capture_image();
+    			    		// on rallume la front_led une fois l'image prise
     					palSetPad(GPIOD, GPIOD_LED_FRONT);
 
-    			    		if(get_action(couleur))
+    			    		if(get_action(couleur)) // on attaque la cible si elle est blanche
     			    			ennemy();
+    			    		// retour à la position initiale
     			    		retour_scan();
     			    		action_cible(-VITESSE_STANDARD, num_cible);
 
+    			    		// passage à la cible suivante
 			    		difference = get_orientation(num_cible);
     			    		if(num_cible < (NB_CIBLES-1))
     			    		{
     			    			num_cible += 1;
+    			    			// calcul de l'orientation relative entre la prochaine cible et
+    			    			//la cible courante
     			    			relative_orientation(num_cible, difference);
     			    		}
-    			    		else if(num_cible == (NB_CIBLES-1))
+    			    		else if(num_cible == (NB_CIBLES-1)) // pas de prochaine cible
     			    			num_cible += 1;
 
     			    		reset_motor();
 				}
 			}
-			//chThdSleepMilliseconds(100);
 		}
 	}
 }
 
 int main(void)
 {
-    halInit();
-    chSysInit();
-    mpu_init();
+   halInit();
+   chSysInit();
+   mpu_init();
 
-    //starts the serial communication
-    serial_start();
-    //starts the USB communication
-    usb_start();
-    //inits the motors
-    motors_init();
-
+   //starts the serial communication
+   serial_start();
+   //starts the USB communication
+   usb_start();
+   //inits the motors
+   motors_init();
+   // starts the ToF sensor
    VL53L0X_start();
+   // starts the camera
    dcmi_start();
    po8030_start();
-   dac_start();
-   playMelodyStart();
 
    chThdCreateStatic(selector_thd_wa, sizeof(selector_thd_wa), NORMALPRIO, selector_thd, NULL);
 
