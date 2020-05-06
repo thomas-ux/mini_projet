@@ -176,7 +176,6 @@ void action_cible(int16_t speed, uint8_t cible)
 {
 	left_motor_set_pos(POSITION_RESET);
 	float step = (RATIO_STEP*get_step(tab_cible[cible].distance));
-	chprintf((BaseSequentialStream *)&SD3, "get_step = %d\n", (int32_t)(step));
 	mvt_robot(speed, speed, (int32_t)(step));
 
 	right_motor_set_speed(VITESSE_NULLE);
@@ -207,6 +206,7 @@ void correction_orientation(void)
 	distance_min = DISTANCE_MAX;
 	orientation_correction = 0;
 
+	//on refait un scan de plus ou moins 30° pour se réaligner
 	left_motor_set_pos(POSITION_RESET);
 	mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), (FENETRE_SCAN));
 
@@ -251,7 +251,7 @@ void retour_scan(void)
 
 uint16_t get_step(uint16_t distance)
 {
-	return ((distance-15)*STEP_ONE_TURN/WHEEL_PERIMETER);
+	return ((distance-MARGE)*STEP_ONE_TURN/WHEEL_PERIMETER);
 }
 
 uint8_t nb_cibles(void)

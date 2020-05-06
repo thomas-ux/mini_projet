@@ -5,7 +5,6 @@
 
 #include <main.h>
 #include <camera/po8030.h>
-
 #include <process_image.h>
 
 static uint8_t image[IMAGE_BUFFER_SIZE] = {0};
@@ -24,8 +23,8 @@ void capture_image(void)
 	//waits for the capture to be done
 	wait_image_ready();
 	image_process();
-	for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
-		chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
+	//for(uint16_t i = (2*FENETRE_MIN) ; i < (2 * FENETRE_MAX) ; i+=2)
+	//	chprintf((BaseSequentialStream *)&SD3, "i = %d intensity = %d\n", (i/2), image[i/2]);
 }
 
 void image_process(void)
@@ -51,20 +50,19 @@ bool get_action(bool couleur)
 	uint16_t blanc = 0;
 	for(uint16_t i=(2*FENETRE_MIN); i<(2*FENETRE_MAX); i+=2)
 	{
-		if(image[i/2]>=SEUIL_BLANC)
+		if(image[i/2]>=SEUIL_BLANC) // pixel blanc
 			blanc++;
 	}
-	chprintf((BaseSequentialStream *)&SD3, "couleur = %d blanc = %d\n", couleur, blanc);
-	if(!couleur)
+	if(!couleur) // si on attaque les cibles noires
 	{
-		if(blanc>30)
+		if(blanc>NB_BLANC)
 			return 0;
 		else
 			return 1;
 	}
-	else
+	else // si on attaque les cibles blanches
 	{
-		if(blanc>30)
+		if(blanc>NB_BLANC)
 			return 1;
 		else
 			return 0;

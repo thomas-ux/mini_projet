@@ -21,7 +21,6 @@
 #include "audio/audio_thread.h"
 #include "audio/play_melody.h"
 
-//.
 
 static THD_WORKING_AREA(selector_thd_wa, 2048);
 
