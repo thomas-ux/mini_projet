@@ -81,57 +81,72 @@ void return_cible(int32_t compteur, bool target)
 	    left_motor_set_speed(-VITESSE_SCAN);
 	    if(VL53L0X_get_dist_mm()<DISTANCE_MAX && VL53L0X_get_dist_mm()>0)
 	    {
-	    		if(compteur<(TOUR-REBOUCLEMENT))
-	    		{
-	    			if((abs(compteur-tab_cible[NB_CIBLES-1].orientation)<ECART_CIBLE))
-	    			{
-	    				if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
-	    				{
-	    					tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[NB_CIBLES-1].orientation = compteur;
-	    				}
-	    			}
-	    			else
-	    			{
-	    				tri_croissant_distance();
-	    				if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
-	    				{
-	    					tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[NB_CIBLES-1].orientation = compteur;
-	    				}
+	    	//si cible se trouve à des orientations <1150
+	    	if(compteur<(TOUR-REBOUCLEMENT))
+	    	{
+	    		//test pour voir s'il on scanne la même cible que précedemment (ecart d'orientation<150 pas => même cible)
+	   			if((abs(compteur-tab_cible[NB_CIBLES-1].orientation)<ECART_CIBLE))
+	   			{
+	   				//si oui mais que la distance est plus faible à cette orientation...
+	   				if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	   				{
+	   					//...on remplace
+    					tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
 	    			}
 	    		}
-	    		else if(compteur>(TOUR-REBOUCLEMENT) && compteur<TOUR)
+	   			//si il ne s'agit pas de la même cible...
+	    		else
 	    		{
-	    			if(min_orientation()<REBOUCLEMENT)				//cible identique autour de 0
+	    			tri_croissant_distance();
+	    			//...on ecrase la case du tableau contenant la plus grande distance
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
 	    			{
-	    				tri_croissant_orientation();
-	    				if(VL53L0X_get_dist_mm()<tab_cible[0].distance)
-	    				{
-	    					tab_cible[0].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[0].orientation = compteur;
-	    				}
-	    			}
-	    			else if(abs(compteur-tab_cible[NB_CIBLES-1].orientation)<ECART_CIBLE)	//cible identique autour de 1200
-	    			{
-	    				if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
-	    				{
-	    					tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[NB_CIBLES-1].orientation = compteur;
-	    				}
-	    			}
-	    			else
-	    			{
-	    				tri_croissant_distance();
-	    				if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
-	    				{
-	    					tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
-	    					tab_cible[NB_CIBLES-1].orientation = compteur;
-	    				}
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
 	    			}
 	    		}
+	    	}
+	    	//si cible scannée se trouve à des orientations >1150...
+	    	else if(compteur>(TOUR-REBOUCLEMENT) && compteur<TOUR)
+	    	{
+	    		//...et si une cible autour de 0 pas (cible d'orientation min_orientation<150 stockée dans tableau)
+	    		if(min_orientation()<REBOUCLEMENT)
+	    		{
+	    			//alors il s'agit de la même cible autour de 0
+	    			tri_croissant_orientation();
+	    			//si la distance est plus faible à cette orientation: on remplace
+	    			if(VL53L0X_get_dist_mm()<tab_cible[0].distance)
+	    			{
+	    				tab_cible[0].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[0].orientation = compteur;
+	    			}
+	    		}
+	    		//si pas de cible autour de 0 pas MAIS cible un peu avant 1150 (cible identique autour de 1150)
+	    		else if(abs(compteur-tab_cible[NB_CIBLES-1].orientation)<ECART_CIBLE)
+	    		{
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    			}
+	    		}
+	    		//si pas de cible autour de 0 NI un peu avant 1150...
+	    		else
+	    		{
+	    			//...alors c'est une nouvelle cible
+	    			tri_croissant_distance();
+	    			//on ecrase la case du tableau contenant la plus grande distance
+	    			if(VL53L0X_get_dist_mm()<tab_cible[NB_CIBLES-1].distance)
+	    			{
+	    				tab_cible[NB_CIBLES-1].distance = VL53L0X_get_dist_mm();
+	    				tab_cible[NB_CIBLES-1].orientation = compteur;
+	    			}
+	    		}
+	    	}
 	    }
 	}
+	//fin du scan
 	else if(compteur==TOUR)
 	{
 		right_motor_set_speed(VITESSE_NULLE);
@@ -152,18 +167,24 @@ int32_t min_orientation(void)
 	return min_orientation;
 }
 
+/*! Oriente le robot vers la cible à la case "num_cible" du tableau
+ *
+ * The e-puck has a green LED that illuminate his body. With this function,
+ * you can change the state of this LED.
+ * \param value 0 (off), 1 (on) otherwise change the state
+ */
 void direction_cible(uint8_t num_cible, bool target)
 {
 	if(!target)
 		tri_croissant_distance();
-	//for(int i=0; i<NB_CIBLES; i++)
-	//	chprintf((BaseSequentialStream *)&SD3, "dir orientation = %d distance = %d\n", tab_cible[i].orientation, (tab_cible[i].distance));
 
 	left_motor_set_pos(POSITION_RESET);
+	//si la cible actuelle est dans demi cercle à droite du robot
 	if(tab_cible[num_cible].orientation >= (TOUR/2))
 	{
 		mvt_robot((-VITESSE_SCAN), VITESSE_SCAN, (TOUR-tab_cible[num_cible].orientation));
 	}
+	//si la cible actuelle est dans demi cercle à gauche du robot
 	else
 	{
 		mvt_robot(VITESSE_SCAN, (-VITESSE_SCAN), tab_cible[num_cible].orientation);
@@ -176,7 +197,6 @@ void action_cible(int16_t speed, uint8_t cible)
 {
 	left_motor_set_pos(POSITION_RESET);
 	float step = (RATIO_STEP*get_step(tab_cible[cible].distance));
-	chprintf((BaseSequentialStream *)&SD3, "get_step = %d\n", (int32_t)(step));
 	mvt_robot(speed, speed, (int32_t)(step));
 
 	right_motor_set_speed(VITESSE_NULLE);
