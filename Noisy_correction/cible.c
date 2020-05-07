@@ -19,8 +19,8 @@
 
 static etat_cible tab_cible[NB_CIBLES] = {0};
 
-uint16_t distance_min = DISTANCE_MAX;
-int32_t orientation_correction = 0;
+static uint16_t distance_min = DISTANCE_MAX;
+static int32_t orientation_correction = 0;
 
 void init_tab_cible(void)
 {
